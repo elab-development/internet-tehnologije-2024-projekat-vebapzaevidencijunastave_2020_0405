@@ -2,21 +2,17 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfesorController;
+use App\Http\Controllers\PredmetController;
+use App\Http\Controllers\RasporedController;
+use App\Http\Controllers\TerminController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\PrisustvoController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-
-
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::resource('profesori', ProfesorController::class);
+Route::resource('predmeti', PredmetController::class);
+Route::resource('rasporedi', RasporedController::class);
+Route::resource('termini', TerminController::class);
+Route::resource('studenti', StudentController::class);
+Route::resource('prisustva', PrisustvoController::class);
 
