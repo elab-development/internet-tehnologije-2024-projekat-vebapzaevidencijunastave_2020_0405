@@ -2,18 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 
+
+
 class Profesor extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-}
-
-class Profesor extends Model
-{
-    use HasFactory;
+    use HasApiTokens, HasFactory;
 
     protected $table = 'profesor';
 
