@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
 
-class Raspored extends Model
+class Raspored extends Authenticatable
 {
-    use HasFactory;
-
+    use HasApiTokens, HasFactory;
+    
     protected $table = 'raspored';
 
     protected $fillable = ['predmet_id',

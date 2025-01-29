@@ -85,8 +85,30 @@ class AuthController extends Controller
             'role' => 'profesor'
         ], 200);
     }
+
+    public function loginAdmin(Request $request)
+{
+    $validatedData = $request->validate([
+        'korisnicko_ime' => 'required|string',
+        'lozinka' => 'required|string'
+    ]);
  
-    // 📌 LOGOUT ZA OBA TIPA KORISNIKA
+    $admin = Admin::where('korisnicko_ime', $validatedData['korisnicko_ime'])->first();
+ 
+    if (!$admin || !Hash::check($validatedData['lozinka'], $admin->lozinka)) {
+        return response()->json(['message' => 'Neispravno korisničko ime ili lozinka'], 401);
+    }
+ 
+    $token = $admin->createToken('authToken')->plainTextToken;
+ 
+    return response()->json([
+        'user' => $admin,
+        'token' => $token,
+        'role' => 'admin'
+    ], 200);
+}
+ 
+    
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();
