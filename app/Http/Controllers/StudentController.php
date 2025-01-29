@@ -65,4 +65,17 @@ class StudentController extends Controller
         $student->delete();
         return response()->json(['message' => 'Student uspešno obrisan'], 200);
     }
+
+
+    //filtriranje studenata po zadatoj godini
+    public function filterByGodinaStudija(Request $request)
+{
+    $godina = $request->query('godina'); // Uzimanje query parametra
+    if (!$godina) {
+        return response()->json(Student::all(), 200);
+    }
+ 
+    $studenti = Student::where('godina_studija', $godina)->get();
+    return response()->json($studenti, 200);
+}
 }

@@ -16,3 +16,6 @@ Route::resource('termini', TerminController::class);
 Route::resource('studenti', StudentController::class);
 Route::resource('prisustva', PrisustvoController::class);
 
+Route::get('predmeti/{id}/profesor', [PredmetController::class, 'getProfesor']);
+Route::get('studenti', [StudentController::class, 'filterByGodinaStudija']);
+Route::get('termini/{id}/prisustvo', [PrisustvoController::class, 'countPrisustvoByTermin']);

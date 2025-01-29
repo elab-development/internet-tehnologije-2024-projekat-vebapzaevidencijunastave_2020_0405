@@ -60,4 +60,20 @@ class PrisustvoController extends Controller
         $prisustvo->delete();
         return response()->json(['message' => 'Prisustvo uspešno obrisano'], 200);
     }
+
+    public function countPrisustvoByTermin($id)
+{
+    $ukupnoPrisutnih = Prisustvo::where('termin_id', $id)->where('status_prisustva', true)->count();
+    $ukupnoOdsutnih = Prisustvo::where('termin_id', $id)->where('status_prisustva', false)->count();
+ 
+    return response()->json([
+        'termin_id' => $id,
+        'ukupno_prisutnih' => $ukupnoPrisutnih,
+        'ukupno_odsutnih' => $ukupnoOdsutnih
+    ], 200);
 }
+
+}
+
+
+

@@ -62,4 +62,16 @@ class PredmetController extends Controller
         $predmet->delete();
         return response()->json(['message' => 'Predmet uspešno obrisan'], 200);
     }
+
+    //pretrazivanje profesora za odredjeni predmet
+    public function getProfesor($id) 
+{
+    $predmet = Predmet::find($id);
+    if (!$predmet) {
+        return response()->json(['message' => 'Predmet nije pronađen'], 404);
+    }
+ 
+    $profesor = $predmet->profesor; // Relacija iz modela
+    return response()->json($profesor, 200);
+}
 }
