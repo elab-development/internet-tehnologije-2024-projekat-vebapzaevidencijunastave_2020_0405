@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
  
 use App\Models\Student;
+use App\Models\Admin;
 use App\Models\Profesor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -85,6 +86,55 @@ class AuthController extends Controller
             'role' => 'profesor'
         ], 200);
     }
+
+    public function registerAdmin(Request $request)
+    {
+        $validatedData = $request->validate([
+            'ime' => 'required|string|max:255',
+            'prezime' => 'required|string|max:255',
+            'email' => 'required|email|unique:admin,email',
+            'korisnicko_ime' => 'required|string|unique:admin,korisnicko_ime|max:255',
+            'lozinka' => 'required|string|min:6',
+        ]);
+    
+        $admin = Admin::create([
+            'ime' => $validatedData['ime'],
+            'prezime' => $validatedData['prezime'],
+            'email' => $validatedData['email'],
+            'korisnicko_ime' => $validatedData['korisnicko_ime'],
+            'lozinka' => bcrypt($validatedData['lozinka']), // Hash lozinke
+        ]);
+    
+        return response()->json([
+            'message' => 'Admin uspešno kreiran',
+            'admin' => $admin
+        ], 201);
+    }
+    
+    public function registerProfesor(Request $request)
+    {
+        $validatedData = $request->validate([
+            'ime' => 'required|string|max:255',
+            'prezime' => 'required|string|max:255',
+            'email' => 'required|email|unique:admin,email',
+            'korisnicko_ime' => 'required|string|unique:admin,korisnicko_ime|max:255',
+            'lozinka' => 'required|string|min:6',
+        ]);
+    
+        $profesor = Profesor::create([
+            'ime' => $validatedData['ime'],
+            'prezime' => $validatedData['prezime'],
+            'email' => $validatedData['email'],
+            'korisnicko_ime' => $validatedData['korisnicko_ime'],
+            'lozinka' => bcrypt($validatedData['lozinka']), // Hash lozinke
+        ]);
+    
+        return response()->json([
+            'message' => 'Profesor uspešno kreiran',
+            'profesor' => $profesor
+        ], 201);
+    }
+    
 
     public function loginAdmin(Request $request)
 {

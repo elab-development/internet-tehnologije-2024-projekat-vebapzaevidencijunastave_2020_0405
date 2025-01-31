@@ -35,6 +35,7 @@ Route::post('student/register', [AuthController::class, 'registerStudent']);
 Route::post('student/login', [AuthController::class, 'loginStudent']);
 Route::post('profesor/login', [AuthController::class, 'loginProfesor']);
 Route::post('admin/login', [AuthController::class, 'loginAdmin']);
- 
+Route::post('admin/register', [AuthController::class, 'registerAdmin']);
+Route::post('profesor/register', [AuthController::class, 'registerProfesor']);
 Route::middleware('auth:sanctum')->post('logout', [AuthController::class, 'logout']);
 
