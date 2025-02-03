@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
  
 class AuthController extends Controller
 {
-    // 📌 REGISTRACIJA STUDENTA
+    // REGISTRACIJA STUDENTA
     public function registerStudent(Request $request)
     {
         $validatedData = $request->validate([
@@ -41,7 +41,7 @@ class AuthController extends Controller
         ], 201);
     }
  
-    // 📌 LOGIN STUDENTA
+    //  LOGIN STUDENTA
     public function loginStudent(Request $request)
     {
         $validatedData = $request->validate([
@@ -64,7 +64,7 @@ class AuthController extends Controller
         ], 200);
     }
  
-    // 📌 LOGIN PROFESORA
+    //  LOGIN PROFESORA
     public function loginProfesor(Request $request)
     {
         $validatedData = $request->validate([

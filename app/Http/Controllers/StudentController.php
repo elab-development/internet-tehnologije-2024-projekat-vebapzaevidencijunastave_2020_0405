@@ -20,11 +20,17 @@ class StudentController extends Controller
             'prezime' => 'required|string|max:255',
             'broj_indeksa' => 'required|string|unique:student,broj_indeksa|max:20',
             'email' => 'required|email|unique:student,email',
+            'lozinka' => 'required|string|min:6',
             'godina_studija' => 'required|integer|min:1|max:5',
         ]);
 
+        $validatedData['lozinka'] = Hash::make($validatedData['lozinka']);
+        
         $student = Student::create($validatedData);
-        return response()->json($student, 201);
+        return response()->json([
+            'message' => 'Student uspešno kreiran',
+            'student' => $student
+        ], 201);
     }
 
     public function show($id)
