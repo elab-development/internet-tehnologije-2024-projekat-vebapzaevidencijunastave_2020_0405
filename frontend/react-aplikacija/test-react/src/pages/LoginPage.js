@@ -71,11 +71,11 @@
 
 // export default LoginPage;
 
-
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import "./LoginPage.css";
+import logo from "../assets/logo.png";
 
 const LoginPage = () => {
   const { login } = useContext(AuthContext);
@@ -83,20 +83,19 @@ const LoginPage = () => {
   const [usernameOrIndex, setUsernameOrIndex] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Dodajemo stanje za spinner
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
 
-    // Provera da li su polja prazna
     if (!usernameOrIndex || !password) {
       setError("Sva polja moraju biti popunjena.");
       return;
     }
 
-    setLoading(true); // Pokrećemo spinner
+    setLoading(true);
 
     setTimeout(() => {
       let role = "";
@@ -108,17 +107,23 @@ const LoginPage = () => {
         role = "admin";
       } else {
         setError("Neispravni podaci za prijavu. Pokušajte ponovo.");
-        setLoading(false); // Gasimo spinner ako login nije uspešan
+        setLoading(false);
         return;
       }
 
       login("mocked-jwt-token", role, navigate);
-      setLoading(false); // Gasimo spinner kada se prijava završi
-    }, 2000); // Simulacija čekanja servera (2 sekunde)
+      setLoading(false);
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    }, 2000);
   };
 
   return (
     <div className="login-container">
+      <img src={logo} alt="FON Logo" className="login-logo" />
       <h1>Prijava</h1>
       <form onSubmit={handleSubmit}>
         <div>
@@ -130,18 +135,18 @@ const LoginPage = () => {
           </select>
         </div>
         <div>
-          <label>{loginType === 'student' ? 'Broj indeksa:' : 'Korisničko ime:'}</label>
           <input
             type="text"
+            placeholder={loginType === "student" ? "Broj indeksa" : "Korisničko ime"}
             value={usernameOrIndex}
             onChange={(e) => setUsernameOrIndex(e.target.value)}
             required
           />
         </div>
         <div>
-          <label>Lozinka:</label>
           <input
             type="password"
+            placeholder="Lozinka"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -149,13 +154,12 @@ const LoginPage = () => {
         </div>
         {error && <p className="error-message">{error}</p>}
         
-        {/* Dugme za prijavu - ako je loading true, prikazuje spinner */}
         <button type="submit" disabled={loading} className="login-button">
           {loading ? "Prijavljivanje..." : "Prijavi se"}
         </button>
 
-        {/* Spinner se prikazuje samo kada je loading true */}
         {loading && <div className="spinner"></div>}
+        <p className="forgot-password">Zaboravili ste lozinku?</p>
       </form>
     </div>
   );
