@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./RasporedPage.css";
+import rasporedPozadina from "../assets/rasporedPozadina.png";
 
 const RasporedPage = () => {
   const [raspored, setRaspored] = useState([]);
@@ -23,7 +24,6 @@ const RasporedPage = () => {
     const uniquePredmeti = [...new Set(testPodaci.map(item => item.predmet))];
     setPredmeti(uniquePredmeti);
 
-
     // axios.get("http://localhost:8000/api/raspored")
     //   .then(response => {
     //     setRaspored(response.data);
@@ -41,56 +41,59 @@ const RasporedPage = () => {
 
   return (
     <div className="raspored-container">
-      <h1>Raspored predavanja</h1>
-      <div className="filter-container">
-        <select value={filterPredmet} onChange={(e) => setFilterPredmet(e.target.value)}>
-          <option value="">Svi predmeti</option>
-          {predmeti.map(predmet => (
-            <option key={predmet} value={predmet}>{predmet}</option>
-          ))}
-        </select>
-
-        <select value={filterDan} onChange={(e) => setFilterDan(e.target.value)}>
-          <option value="">Svi dani</option>
-          {dani.map(dan => (
-            <option key={dan} value={dan}>{dan}</option>
-          ))}
-        </select>
-
-        <input 
-          type="text" 
-          placeholder="Pretraga po sali" 
-          value={filterSala} 
-          onChange={(e) => setFilterSala(e.target.value)}
-        />
-      </div>
-
-      {filtriraniRaspored.length === 0 ? (
-        <p className="no-results">Nema rezultata za zadate filtere.</p>
-      ) : (
-        <table className="raspored-table">
-          <thead>
-            <tr>
-              <th>Predmet</th>
-              <th>Dan</th>
-              <th>Početak</th>
-              <th>Kraj</th>
-              <th>Sala</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtriraniRaspored.map((item, index) => (
-              <tr key={index}>
-                <td>{item.predmet}</td>
-                <td>{item.dan}</td>
-                <td>{item.vreme_pocetka}</td>
-                <td>{item.vreme_zavrsetka}</td>
-                <td>{item.sala}</td>
-              </tr>
+      <div className="background-overlay" style={{ backgroundImage: `url(${rasporedPozadina})` }}></div>
+      <div className="content-wrapper" style={{ backgroundImage: `url(${rasporedPozadina})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+        <h1>Raspored predavanja</h1>
+        <div className="filter-container">
+          <select value={filterPredmet} onChange={(e) => setFilterPredmet(e.target.value)}>
+            <option value="">Svi predmeti</option>
+            {predmeti.map(predmet => (
+              <option key={predmet} value={predmet}>{predmet}</option>
             ))}
-          </tbody>
-        </table>
-      )}
+          </select>
+
+          <select value={filterDan} onChange={(e) => setFilterDan(e.target.value)}>
+            <option value="">Svi dani</option>
+            {dani.map(dan => (
+              <option key={dan} value={dan}>{dan}</option>
+            ))}
+          </select>
+
+          <input 
+            type="text" 
+            placeholder="Pretraga po sali" 
+            value={filterSala} 
+            onChange={(e) => setFilterSala(e.target.value)}
+          />
+        </div>
+
+        {filtriraniRaspored.length === 0 ? (
+          <p className="no-results">Nema rezultata za zadate filtere.</p>
+        ) : (
+          <table className="raspored-table">
+            <thead>
+              <tr>
+                <th>Predmet</th>
+                <th>Dan</th>
+                <th>Početak</th>
+                <th>Kraj</th>
+                <th>Sala</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtriraniRaspored.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.predmet}</td>
+                  <td>{item.dan}</td>
+                  <td>{item.vreme_pocetka}</td>
+                  <td>{item.vreme_zavrsetka}</td>
+                  <td>{item.sala}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };
