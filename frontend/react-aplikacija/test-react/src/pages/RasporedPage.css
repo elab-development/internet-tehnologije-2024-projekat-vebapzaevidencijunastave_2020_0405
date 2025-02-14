@@ -1,14 +1,14 @@
-.raspored-container {
+/* .raspored-container {
     position: relative;
     width: 100vw;
     height: 100vh;
     background-color: #d0dfd3; /* Svetlije zelenkasta pozadina */
-    display: flex;
+    /* display: flex;
     justify-content: center;
     align-items: center;
   }
-  
-  .background-overlay {
+   */
+  /* .background-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -30,9 +30,9 @@
     max-width: 1300px;
     position: relative;
     z-index: 1;
-  }
+  } */
   
-  .raspored-table {
+  /* .raspored-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
@@ -46,12 +46,112 @@
   
   .raspored-table th {
     background-color: #063f14; /* Zelena zaglavlja */
-    color: white;
-  }
+    /* color: white;
+  } */
   
-  .raspored-table tr:nth-child(even) {
+  /* .raspored-table tr:nth-child(even) {
     background-color: #EAF5EA;
-  }
+  } */ 
+
+  .raspored-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: #d0dfd3; /* Svetlije zelenkasta pozadina */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../assets/rasporedPozadina.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.4; 
+    z-index: -1;
+}
+
+.content-wrapper {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    width: 90%;
+    max-width: 1300px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.raspored-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.raspored-table th, .raspored-table td {
+    border: 1px solid #ccc;
+    padding: 12px;
+    text-align: center;
+}
+
+.raspored-table th {
+    background-color: #063f14; /* Zelena zaglavlja */
+    color: white;
+}
+
+.raspored-table tr:nth-child(even) {
+    background-color: #EAF5EA;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover {
+    background-color: #d4edda;
+}
+
+/* Stil za pop-up prozor */
+.popup-container {
+    width: 100%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.popup-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #063f14;
+}
+
+.popup-content {
+    margin: 15px 0;
+}
+
+.prijava-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.prijava-button:hover {
+    background-color: #3e8e41;
+}
+
   
   
   
