@@ -9,6 +9,7 @@ use App\Http\Controllers\TerminController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\PrisustvoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
  
 
 
@@ -34,6 +35,11 @@ Route::post('profesor/login', [AuthController::class, 'loginProfesor']);
 Route::post('admin/register', [AuthController::class, 'registerAdmin']);
 Route::post('admin/login', [AuthController::class, 'loginAdmin']);
 
-
-Route::middleware('auth:sanctum')->post('logout', [AuthController::class, 'logout']);
+// rute za profil (zaštićene)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('student/profile', [StudentController::class, 'getProfile']);
+    Route::get('profesor/profile', [ProfesorController::class, 'getProfile']);
+    Route::get('admin/profile', [AdminController::class, 'getProfile']);
+    Route::post('logout', [AuthController::class, 'logout']);
+});
 

@@ -84,4 +84,10 @@ class StudentController extends Controller
     $studenti = Student::where('godina_studija', $godina)->get();
     return response()->json($studenti, 200);
 }
+
+public function getProfile(Request $request)
+{
+    $student = $request->user();
+    return response()->json($student);
+}
 }

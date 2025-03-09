@@ -80,5 +80,13 @@ class ProfesorController extends Controller
         $profesor->delete();
         return response()->json(['message' => 'Profesor uspešno obrisan'], 200);
     }
+
+    public function getProfile(Request $request)
+    {
+        $profesor = $request->user();
+        // Dodajemo i predmete koje profesor predaje
+        $profesor->load('predmeti');
+        return response()->json($profesor);
+    }
 }
 

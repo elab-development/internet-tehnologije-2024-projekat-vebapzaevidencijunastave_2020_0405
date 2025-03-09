@@ -1,12 +1,15 @@
 nav {
-  background-color: #333;
+  background-color: #063f14;
   padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 ul {
   list-style: none;
   display: flex;
-  justify-content: space-around;
+  gap: 2rem;
   margin: 0;
   padding: 0;
 }
@@ -18,12 +21,25 @@ li {
 a {
   color: white;
   text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .active {
   font-weight: bold;
-  border-bottom: 2px solid #fff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
+
+.user-info {
+  color: white;
+  margin-right: 1rem;
+}
+
 .logout-btn {
   background-color: #ff4d4d;
   color: white;

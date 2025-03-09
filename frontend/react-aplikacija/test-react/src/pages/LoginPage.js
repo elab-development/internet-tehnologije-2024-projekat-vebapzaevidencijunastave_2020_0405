@@ -1,124 +1,64 @@
-// import React, { useState } from 'react';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-
-// const LoginPage = () => {
-//   const [loginType, setLoginType] = useState('student'); // 'student', 'profesor', 'admin'
-//   const [usernameOrIndex, setUsernameOrIndex] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [error, setError] = useState('');
-//   const navigate = useNavigate();
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       let payload = {};
-
-//       if (loginType === 'student') {
-//         payload = { broj_indeksa: usernameOrIndex, password };
-//       } else {
-//         payload = { korisnicko_ime: usernameOrIndex, password };
-//       }
-
-//       const response = await axios.post('URL_TVOG_BACKEND_API/login', payload);
-//       const { token, role } = response.data;
-
-//       localStorage.setItem('token', token);
-//       localStorage.setItem('role', role);
-
-//       navigate(role === 'admin' ? '/admin' : '/');
-//     } catch (err) {
-//       setError('Neispravni podaci za prijavu. Pokušajte ponovo.');
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h1>Prijava</h1>
-//       <form onSubmit={handleSubmit}>
-//         <div>
-//           <label>Tip korisnika:</label>
-//           <select value={loginType} onChange={(e) => setLoginType(e.target.value)}>
-//             <option value="student">Student</option>
-//             <option value="profesor">Profesor</option>
-//             <option value="admin">Administrator</option>
-//           </select>
-//         </div>
-//         <div>
-//           <label>{loginType === 'student' ? 'Broj indeksa:' : 'Korisničko ime:'}</label>
-//           <input
-//             type="text"
-//             value={usernameOrIndex}
-//             onChange={(e) => setUsernameOrIndex(e.target.value)}
-//             required
-//           />
-//         </div>
-//         <div>
-//           <label>Lozinka:</label>
-//           <input
-//             type="password"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//             required
-//           />
-//         </div>
-//         {error && <p style={{ color: 'red' }}>{error}</p>}
-//         <button type="submit">Prijavi se</button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default LoginPage;
-
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import "./LoginPage.css";
 import logo from "../assets/logo.png";
+import axios, { getCsrfToken } from '../api/axios';
 
 const LoginPage = () => {
   const { login } = useContext(AuthContext);
-  const [loginType, setLoginType] = useState('student');
-  const [usernameOrIndex, setUsernameOrIndex] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); 
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!usernameOrIndex || !password) {
+    
+    if (!identifier || !password) {
       setError("Sva polja moraju biti popunjena.");
       return;
     }
 
     setLoading(true);
 
-    setTimeout(() => {
-      let role = "";
-      if (loginType === "student" && usernameOrIndex === "2020-001" && password === "test123") {
-        role = "student";
-      } else if (loginType === "profesor" && usernameOrIndex === "profesor1" && password === "test123") {
-        role = "profesor";
-      } else if (loginType === "admin" && usernameOrIndex === "admin" && password === "admin123") {
-        role = "admin";
+    try {
+      await getCsrfToken();
+
+      // Određivanje tipa korisnika na osnovu identifikatora
+      let endpoint;
+      let payload;
+
+      if (identifier.match(/^\d{4}\/\d{4}$/)) {
+        // Format broja indeksa (npr. 2020/0405)
+        endpoint = '/api/student/login';
+        payload = { broj_indeksa: identifier, lozinka: password };
+      } else if (identifier.startsWith('admin')) {
+        // Admin korisničko ime počinje sa 'admin'
+        endpoint = '/api/admin/login';
+        payload = { korisnicko_ime: identifier, lozinka: password };
       } else {
-        setError("Neispravni podaci za prijavu. Pokušajte ponovo.");
-        setLoading(false);
-        return;
+        // Ostalo su profesori
+        endpoint = '/api/profesor/login';
+        payload = { korisnicko_ime: identifier, lozinka: password };
       }
 
-      login("mocked-jwt-token", role, navigate);
-      setLoading(false);
-      if (role === "admin") {
-        navigate("/admin");
+      const response = await axios.post(endpoint, payload);
+      const { token, role } = response.data;
+
+      login(token, role);
+    } catch (err) {
+      if (err.response) {
+        setError(err.response.data.message || "Neispravni podaci za prijavu. Pokušajte ponovo.");
+      } else if (err.request) {
+        setError("Greška u komunikaciji sa serverom. Proverite vašu internet konekciju.");
       } else {
-        navigate("/");
+        setError("Došlo je do greške. Pokušajte ponovo.");
       }
-    }, 2000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -127,19 +67,11 @@ const LoginPage = () => {
       <h1>Prijava</h1>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Tip korisnika:</label>
-          <select value={loginType} onChange={(e) => setLoginType(e.target.value)}>
-            <option value="student">Student</option>
-            <option value="profesor">Profesor</option>
-            <option value="admin">Administrator</option>
-          </select>
-        </div>
-        <div>
           <input
             type="text"
-            placeholder={loginType === "student" ? "Broj indeksa" : "Korisničko ime"}
-            value={usernameOrIndex}
-            onChange={(e) => setUsernameOrIndex(e.target.value)}
+            placeholder="Broj indeksa (2020/0405) ili korisničko ime"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             required
           />
         </div>
@@ -159,7 +91,11 @@ const LoginPage = () => {
         </button>
 
         {loading && <div className="spinner"></div>}
-        <p className="forgot-password">Zaboravili ste lozinku?</p>
+        <p className="login-help">
+          * Za studente unesite broj indeksa u formatu YYYY/XXXX (npr. 2020/0405)<br />
+          * Za profesore unesite vaše korisničko ime<br />
+          * Za administratore korisničko ime mora početi sa "admin"
+        </p>
       </form>
     </div>
   );
