@@ -91,11 +91,6 @@ const LoginPage = () => {
         </button>
 
         {loading && <div className="spinner"></div>}
-        <p className="login-help">
-          * Za studente unesite broj indeksa u formatu YYYY/XXXX (npr. 2020/0405)<br />
-          * Za profesore unesite vaše korisničko ime<br />
-          * Za administratore korisničko ime mora početi sa "admin"
-        </p>
       </form>
     </div>
   );

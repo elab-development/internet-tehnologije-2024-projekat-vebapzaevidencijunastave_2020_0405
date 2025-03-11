@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Auth;
  
 class AuthController extends Controller
 {
+    /**
+     * Konstruktor koji isključuje CSRF zaštitu za sve metode u ovom kontroleru
+     */
+    public function __construct()
+    {
+        $this->middleware('web')->except(['loginStudent', 'loginProfesor', 'loginAdmin', 'registerStudent', 'registerProfesor', 'registerAdmin']);
+    }
+    
     // REGISTRACIJA STUDENTA
     public function registerStudent(Request $request)
     {

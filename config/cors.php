@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000'], // Samo React
+    'allowed_origins' => ['*'], // Dozvoli sve izvore tokom razvoja
 
     'allowed_origins_patterns' => [],
 
