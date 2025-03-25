@@ -10,6 +10,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\PrisustvoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\RasporedProfesorController;
  
 
 
@@ -41,5 +42,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profesor/profile', [ProfesorController::class, 'getProfile']);
     Route::get('admin/profile', [AdminController::class, 'getProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
+    
+    // Nove rute za raspored
+    Route::get('student/raspored', [RasporedProfesorController::class, 'getStudentRaspored']);
+    Route::get('profesor/raspored', [RasporedProfesorController::class, 'getProfesorRaspored']);
+    Route::post('rasporedi/{rasporedId}/predmeti', [RasporedController::class, 'attachPredmet']);
+
+    // Nove rute za prisustvo
+    Route::get('student/prisustva', [PrisustvoController::class, 'getStudentPrisustva']);
+    Route::get('student/aktivni-termini', [PrisustvoController::class, 'getAktivniTermini']);
+    Route::post('student/evidentiraj-prisustvo', [PrisustvoController::class, 'evidentirajPrisustvo']);
+    
+    // Ruta za prikaz statistike prisustva po terminu (za profesora)
+    Route::get('prisustvo/termin/{rasporedPredmetId}/{datum?}', [PrisustvoController::class, 'countPrisustvoByTermin']);
 });
 

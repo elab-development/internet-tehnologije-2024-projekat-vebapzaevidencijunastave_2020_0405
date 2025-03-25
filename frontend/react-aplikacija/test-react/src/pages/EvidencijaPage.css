@@ -1,21 +1,40 @@
 .evidencija-container {
-    width: 100vw;
-    height: 100vh;
+    padding-top: 80px;
+    padding-bottom: 40px;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    color: #333;
 }
- 
+
+.evidencija-container h1 {
+    color: #063f14;
+    margin-bottom: 30px;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
 .filter-container {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
- 
+
+.filter-container select, 
+.filter-container input {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+}
+
 .evidencija-table {
     width: 90%;
     max-width: 1300px;
@@ -23,28 +42,218 @@
     background-color: rgba(255, 255, 255, 0.95);
     border-radius: 10px;
     overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
- 
+
 .evidencija-table th, .evidencija-table td {
     border: 1px solid #ccc;
     padding: 12px;
     text-align: center;
 }
- 
+
 .evidencija-table th {
     background-color: #063f14;
     color: white;
 }
- 
+
 .evidencija-table tr:nth-child(even) {
     background-color: #EAF5EA;
 }
- 
+
 .prisutan {
-    background-color: #c8e6c9;
+    background-color: #c8e6c9 !important;
 }
- 
+
 .odsutan {
-    background-color: #ffcccb;
-    color: red;
+    background-color: #ffcccb !important;
+    color: #d32f2f;
+}
+
+.no-results {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    font-style: italic;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.loading, .error-message {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 20px;
+}
+
+.loading {
+    color: #063f14;
+}
+
+.error-message {
+    color: #d32f2f;
+}
+
+/* Stilovi za tabove */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    width: 80%;
+    max-width: 600px;
+    justify-content: center;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid #063f14;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #063f14;
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    background-color: #063f14;
+    color: white;
+}
+
+.tab-button:hover {
+    background-color: rgba(6, 63, 20, 0.1);
+}
+
+/* Stilovi za statistiku prisustva */
+.statistika {
+    width: 90%;
+    max-width: 800px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.statistika h3 {
+    color: #063f14;
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.predmet-statistika {
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    height: 20px;
+    background-color: #eee;
+    border-radius: 10px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background-color: #063f14;
+    border-radius: 10px;
+}
+
+/* Stilovi za aktivne termine */
+.aktivni-termini {
+    width: 90%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.aktivni-termini h2 {
+    color: #063f14;
+    margin-bottom: 20px;
+}
+
+.termini-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.termin-kartica {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.termin-kartica h3 {
+    color: #063f14;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.termin-kartica p {
+    margin: 5px 0;
+}
+
+.evidentiraj-btn, .refresh-btn {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #063f14;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.evidentiraj-btn:hover, .refresh-btn:hover {
+    background-color: #0a5d22;
+}
+
+.evidentirano-btn {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #ccc;
+    color: #666;
+    border: none;
+    border-radius: 5px;
+    cursor: not-allowed;
+    font-weight: bold;
+}
+
+.refresh-btn {
+    margin-top: 20px;
+}
+
+/* Responzivni dizajn */
+@media (max-width: 768px) {
+    .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+        width: 90%;
+    }
+    
+    .tabs {
+        width: 90%;
+        flex-direction: column;
+    }
+    
+    .evidencija-table {
+        font-size: 14px;
+    }
+    
+    .evidencija-table th, .evidencija-table td {
+        padding: 8px 5px;
+    }
 }

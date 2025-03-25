@@ -13,16 +13,19 @@ class Predmet extends Authenticatable
 
     protected $table = 'predmet';
 
-    protected $fillable = ['naziv', 'semestar','godina_studija', 'profesor_id',];
+    protected $fillable = ['naziv', 'semestar', 'godina_studija', 'profesor_id'];
 
     public function profesor()
     {
         return $this->belongsTo(Profesor::class, 'profesor_id');
     }
 
+    // Many-to-many veza sa rasporedima
     public function rasporedi()
     {
-        return $this->hasMany(Raspored::class, 'predmet_id');
+        return $this->belongsToMany(Raspored::class, 'raspored_predmet')
+                   ->withPivot('dan_u_nedelji', 'vreme_pocetka', 'vreme_zavrsetka', 'sala', 'tip_nastave')
+                   ->withTimestamps();
     }
 }
 

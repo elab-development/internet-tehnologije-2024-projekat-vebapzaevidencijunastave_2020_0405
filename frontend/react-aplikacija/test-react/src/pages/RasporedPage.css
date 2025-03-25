@@ -54,104 +54,389 @@
   } */ 
 
   .raspored-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    background-color: #d0dfd3; /* Svetlije zelenkasta pozadina */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.background-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('../assets/rasporedPozadina.png');
+    padding-top: 80px;
+    padding-bottom: 40px;
+    min-height: 100vh;
+    text-align: center;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.4; 
-    z-index: -1;
-}
+    color: #333;
+  }
 
-.content-wrapper {
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 40px;
-    border-radius: 10px;
-    text-align: center;
-    width: 90%;
-    max-width: 1300px;
-    position: relative;
-    z-index: 1;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.raspored-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.raspored-table th, .raspored-table td {
-    border: 1px solid #ccc;
-    padding: 12px;
-    text-align: center;
-}
-
-.raspored-table th {
-    background-color: #063f14; /* Zelena zaglavlja */
-    color: white;
-}
-
-.raspored-table tr:nth-child(even) {
-    background-color: #EAF5EA;
-}
-
-.clickable-row {
-    cursor: pointer;
-}
-
-.clickable-row:hover {
-    background-color: #d4edda;
-}
-
-/* Stil za pop-up prozor */
-.popup-container {
-    width: 100%;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.9);
+  .raspored-info {
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
 
-.popup-title {
-    font-size: 20px;
+  .raspored-info h2 {
+    margin-top: 0;
+    color: #0c7627;
+  }
+
+  .filter-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 20px;
+  }
+
+  .filter-container select, 
+  .filter-container input {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+  }
+
+  .raspored-table {
+    width: 95%;
+    max-width: 1300px;
+    margin: 0 auto;
+    overflow-x: auto;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .raspored-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .raspored-table th, 
+  .raspored-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .raspored-table th {
+    background-color: #063f14;
+    color: white;
+  }
+
+  .raspored-table tr:hover {
+    background-color: rgba(6, 63, 20, 0.05);
+  }
+
+  .details-btn,
+  .evidentiraj-btn,
+  .refresh-btn {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+
+  .details-btn {
+    background-color: #063f14;
+    color: white;
+  }
+
+  .details-btn:hover {
+    background-color: #0a5d22;
+  }
+
+  .evidentiraj-btn {
+    background-color: #1565c0;
+    color: white;
+  }
+
+  .evidentiraj-btn:hover {
+    background-color: #0d47a1;
+  }
+
+  .evidentirano-btn {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    font-weight: bold;
+  }
+
+  .refresh-btn {
+    background-color: #4caf50;
+    color: white;
+  }
+
+  .refresh-btn:hover {
+    background-color: #388e3c;
+  }
+
+  .modal {
+    display: flex;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 80%;
+    position: relative;
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal h2 {
+    margin-top: 0;
+    color: #063f14;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+
+  .modal p {
+    margin: 10px 0;
+  }
+
+  .modal-btn {
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  .modal-status {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .modal-status.evidentirano {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .loading, .error-message {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 20px auto;
+    max-width: 800px;
+  }
+
+  .loading {
+    color: #063f14;
+  }
+
+  .error-message {
+    color: #d32f2f;
+  }
+
+  /* Stil za aktivne termine */
+  .aktivan-termin {
+    background-color: rgba(76, 175, 80, 0.15) !important;
+  }
+
+  .aktivni-termini-info {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 0 auto 20px;
+    max-width: 600px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .aktivni-termini-info p {
+    margin: 0;
     font-weight: bold;
     color: #063f14;
-}
+  }
 
-.popup-content {
-    margin: 15px 0;
-}
+  /* Stil za switch */
+  .switch-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+  }
 
-.prijava-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
     cursor: pointer;
-    border-radius: 5px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: #063f14;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #063f14;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  .slider.round {
+    border-radius: 24px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+
+  /* Responzivni dizajn */
+  @media (max-width: 768px) {
+    .filter-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .switch-container {
+      margin-left: 0;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    
+    .aktivni-termini-info {
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .raspored-table th, 
+    .raspored-table td {
+      padding: 8px 5px;
+      font-size: 14px;
+    }
+    
+    .details-btn,
+    .evidentiraj-btn,
+    .evidentirano-btn,
+    .refresh-btn {
+      padding: 6px 10px;
+      font-size: 12px;
+      margin: 3px;
+    }
+    
+    .modal-content {
+      padding: 20px;
+      width: 90%;
+    }
+  }
+
+  .raspored-selector {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .raspored-selector label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .raspored-selector select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+
+  .raspored-selector select:hover {
+    border-color: #007bff;
+  }
+
+  .raspored-selector select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  }
+
+  .aktivan-badge {
+    display: inline-block;
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
     margin-top: 10px;
-}
-
-.prijava-button:hover {
-    background-color: #3e8e41;
-}
-
+    font-weight: 500;
+  }
+  
   
   
   
