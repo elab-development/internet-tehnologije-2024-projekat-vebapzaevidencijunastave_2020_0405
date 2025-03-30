@@ -87,7 +87,7 @@ class RasporedController extends Controller
             'dan_u_nedelji' => 'required|in:Ponedeljak,Utorak,Sreda,Cetvrtak,Petak,Subota',
             'vreme_pocetka' => 'required|date_format:H:i',
             'vreme_zavrsetka' => 'required|date_format:H:i|after:vreme_pocetka',
-            'ucionica' => 'required|string',
+            'sala' => 'required|string',
             'tip_nastave' => 'required|in:Predavanje,Vezbe'
         ]);
 
@@ -97,7 +97,7 @@ class RasporedController extends Controller
             'dan_u_nedelji' => $request->dan_u_nedelji,
             'vreme_pocetka' => $request->vreme_pocetka,
             'vreme_zavrsetka' => $request->vreme_zavrsetka,
-            'ucionica' => $request->ucionica,
+            'sala' => $request->sala,
             'tip_nastave' => $request->tip_nastave
         ]);
 
