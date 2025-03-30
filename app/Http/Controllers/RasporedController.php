@@ -84,7 +84,7 @@ class RasporedController extends Controller
     {
         $request->validate([
             'predmet_id' => 'required|exists:predmet,id',
-            'dan_u_nedelji' => 'required|in:Ponedeljak,Utorak,Sreda,Cetvrtak,Petak,Subota',
+            'dan_u_nedelji' => 'required|in:Ponedeljak,Utorak,Sreda,Cetvrtak,Petak,Subota,Nedelja',
             'vreme_pocetka' => 'required|date_format:H:i',
             'vreme_zavrsetka' => 'required|date_format:H:i|after:vreme_pocetka',
             'sala' => 'required|string',

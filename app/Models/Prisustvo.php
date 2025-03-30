@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Prisustvo extends Authenticatable
 {
@@ -25,14 +26,6 @@ class Prisustvo extends Authenticatable
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    /**
-     * @deprecated Koristiti rasporedPredmet() vezu umesto ove.
-     */
-    public function termin()
-    {
-        return $this->belongsTo(Termin::class, 'termin_id');
-    }
-    
     /**
      * Veza sa raspored_predmet tabelom koja sadrži podatke o terminu
      */

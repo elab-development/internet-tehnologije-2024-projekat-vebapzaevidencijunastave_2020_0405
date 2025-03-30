@@ -53,22 +53,43 @@ class RasporedPredmet extends Model
      */
     public function isAktivan()
     {
-        $trenutnoVreme = now()->format('H:i');
-        $trenutniDan = now()->englishDayOfWeek;
-        
-        $daniMapa = [
-            'Monday' => 'Ponedeljak',
-            'Tuesday' => 'Utorak',
-            'Wednesday' => 'Sreda',
-            'Thursday' => 'Cetvrtak',
-            'Friday' => 'Petak',
-            'Saturday' => 'Subota',
-            'Sunday' => 'Nedelja'
-        ];
+        try {
+            // 1. Provera dana u nedelji
+            $trenutniDan = now()->englishDayOfWeek;
+            $daniMapa = [
+                'Monday' => 'Ponedeljak',
+                'Tuesday' => 'Utorak',
+                'Wednesday' => 'Sreda',
+                'Thursday' => 'Cetvrtak',
+                'Friday' => 'Petak',
+                'Saturday' => 'Subota',
+                'Sunday' => 'Nedelja'
+            ];
 
-        return $daniMapa[$trenutniDan] === $this->dan_u_nedelji &&
-               $trenutnoVreme >= $this->vreme_pocetka &&
-               $trenutnoVreme <= $this->vreme_zavrsetka;
+            if ($daniMapa[$trenutniDan] !== $this->dan_u_nedelji) {
+                return false;
+            }
+
+            // 2. Provera vremena
+            $trenutnoVreme = Carbon::now();
+            $vremePocetka = Carbon::createFromTimeString($this->vreme_pocetka);
+            $vremeZavrsetka = Carbon::createFromTimeString($this->vreme_zavrsetka);
+            
+            // Postavimo isti datum za sva vremena da bi poređenje radilo
+            $vremePocetka->setDate($trenutnoVreme->year, $trenutnoVreme->month, $trenutnoVreme->day);
+            $vremeZavrsetka->setDate($trenutnoVreme->year, $trenutnoVreme->month, $trenutnoVreme->day);
+            
+            // Za prikaz aktivnih termina, termin je aktivan samo tokom trajanja časa
+            return $trenutnoVreme->between($vremePocetka, $vremeZavrsetka);
+            
+        } catch (\Exception $e) {
+            \Log::error('Greška pri proveri aktivnosti termina: ' . $e->getMessage(), [
+                'vreme_pocetka' => $this->vreme_pocetka,
+                'vreme_zavrsetka' => $this->vreme_zavrsetka,
+                'exception' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
     }
     
     /**
@@ -76,7 +97,6 @@ class RasporedPredmet extends Model
      */
     public static function aktivniTermini()
     {
-        $trenutnoVreme = now()->format('H:i');
         $trenutniDan = now()->englishDayOfWeek;
         
         $daniMapa = [
@@ -90,9 +110,10 @@ class RasporedPredmet extends Model
         ];
 
         return self::where('dan_u_nedelji', $daniMapa[$trenutniDan])
-            ->where('vreme_pocetka', '<=', $trenutnoVreme)
-            ->where('vreme_zavrsetka', '>=', $trenutnoVreme)
-            ->get();
+            ->get()
+            ->filter(function($termin) {
+                return $termin->isAktivan();
+            });
     }
     
     /**
@@ -105,7 +126,7 @@ class RasporedPredmet extends Model
             1 => 'Ponedeljak',
             2 => 'Utorak',
             3 => 'Sreda',
-            4 => 'Četvrtak',
+            4 => 'Cetvrtak',
             5 => 'Petak',
             6 => 'Subota',
             7 => 'Nedelja'

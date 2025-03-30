@@ -177,105 +177,145 @@ class PrisustvoController extends Controller
     }
     
     /**
-     * Evidentira prisustvo trenutno ulogovanog studenta na aktivnom terminu
-     */
-    public function evidentirajPrisustvo(Request $request)
-    {
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Korisnik nije autentifikovan'], 401);
-        }
-        
-        $user = Auth::user();
-        
-        if (!($user instanceof Student)) {
-            return response()->json(['message' => 'Pristup dozvoljen samo studentima'], 403);
-        }
-        
-        $validatedData = $request->validate([
-            'raspored_predmet_id' => 'required|exists:raspored_predmet,id',
-        ]);
-        
-        // Provera da li je termin aktivan
-        $rasporedPredmet = RasporedPredmet::find($validatedData['raspored_predmet_id']);
-        if (!$rasporedPredmet->isAktivan()) {
-            return response()->json(['message' => 'Termin trenutno nije aktivan'], 400);
-        }
-        
-        // Provera da li student već ima evidentirano prisustvo za današnji dan
-        $danas = Carbon::today()->format('Y-m-d');
-        $postojecePrisustvo = Prisustvo::where('student_id', $user->id)
-            ->where('raspored_predmet_id', $validatedData['raspored_predmet_id'])
-            ->where('datum_evidencije', $danas)
-            ->first();
-            
-        if ($postojecePrisustvo) {
-            return response()->json(['message' => 'Prisustvo već evidentirano za ovaj termin'], 409);
-        }
-        
-        // Kreiranje novog prisustva
-        $prisustvo = Prisustvo::create([
-            'student_id' => $user->id,
-            'raspored_predmet_id' => $validatedData['raspored_predmet_id'],
-            'datum_evidencije' => $danas,
-            'status_prisustva' => true // Podrazumevano je prisutan
-        ]);
-        
-        return response()->json([
-            'message' => 'Prisustvo uspešno evidentirano',
-            'prisustvo' => $prisustvo
-        ], 201);
-    }
-    
-    /**
-     * Dohvata aktivne termine za današnji dan - termine na kojima student može da se evidentira
+     * Dohvata sve današnje termine za studenta
      */
     public function getAktivniTermini()
     {
-        if (!Auth::check()) {
-            return response()->json(['message' => 'Korisnik nije autentifikovan'], 401);
-        }
+        $student = auth()->user();
         
-        $user = Auth::user();
+        // Prvo dohvatamo današnji dan
+        $now = Carbon::now();
+        $daniUNedelji = [
+            1 => 'Ponedeljak',
+            2 => 'Utorak',
+            3 => 'Sreda',
+            4 => 'Cetvrtak',
+            5 => 'Petak',
+            6 => 'Subota',
+            7 => 'Nedelja'
+        ];
+        $trenutniDan = $daniUNedelji[$now->dayOfWeek === 0 ? 7 : $now->dayOfWeek];
         
-        if (!($user instanceof Student)) {
-            return response()->json(['message' => 'Pristup dozvoljen samo studentima'], 403);
-        }
-        
-        // Dohvatamo današnji dan na srpskom
-        $danUNedelji = $this->daniUNedelji[Carbon::now()->format('l')];
-        
-        // Dohvatamo aktivne termine za danas
-        $aktivniTermini = RasporedPredmet::where('dan_u_nedelji', $danUNedelji)
-            ->whereHas('raspored', function($query) use ($user) {
-                $query->where('godina_studija', $user->godina_studija)
-                    ->where('aktivan', true);
+        // Dohvatamo termine za današnji dan i studentovu godinu studija
+        $današnjiTermini = RasporedPredmet::with(['predmet', 'raspored'])
+            ->whereHas('raspored', function($query) use ($student) {
+                $query->where('godina_studija', $student->godina_studija);
             })
-            ->with(['predmet', 'raspored'])
+            ->where('dan_u_nedelji', $trenutniDan)
+            ->orderBy('vreme_pocetka')
             ->get()
-            ->filter(function($termin) {
-                return $termin->isAktivan();
+            ->map(function($termin) use ($student) {
+                // Proveravamo da li je student već evidentirao prisustvo
+                $evidentiran = Prisustvo::where('student_id', $student->id)
+                    ->where('raspored_predmet_id', $termin->id)
+                    ->whereDate('datum_evidencije', Carbon::today())
+                    ->exists();
+                
+                return [
+                    'id' => $termin->id,
+                    'naziv' => $termin->predmet->naziv,
+                    'dan_u_nedelji' => $termin->dan_u_nedelji,
+                    'vreme_pocetka' => $termin->vreme_pocetka,
+                    'vreme_zavrsetka' => $termin->vreme_zavrsetka,
+                    'sala' => $termin->sala,
+                    'tip_nastave' => $termin->tip_nastave,
+                    'evidentiran' => $evidentiran
+                ];
             });
-        
-        // Obeležavamo termine na kojima je student već evidentiran
-        $danas = Carbon::today()->format('Y-m-d');
-        $evidentiraniTermini = Prisustvo::where('student_id', $user->id)
-            ->where('datum_evidencije', $danas)
-            ->pluck('raspored_predmet_id')
-            ->toArray();
+
+        return response()->json($današnjiTermini);
+    }
+
+    /**
+     * Evidentira prisustvo studenta na terminu
+     */
+    public function evidentirajPrisustvo(Request $request)
+    {
+        try {
+            $request->validate([
+                'raspored_predmet_id' => 'required|exists:raspored_predmet,id'
+            ]);
+
+            $termin = RasporedPredmet::findOrFail($request->raspored_predmet_id);
+            $student = auth()->user();
+
+            // Provera vremena termina
+            $trenutnoVreme = Carbon::now();
+            $terminPocetak = Carbon::createFromTimeString($termin->vreme_pocetka);
+            $terminKraj = Carbon::createFromTimeString($termin->vreme_zavrsetka);
             
-        $formattedTermini = $aktivniTermini->map(function($termin) use ($evidentiraniTermini) {
-            return [
-                'id' => $termin->id,
-                'predmet' => $termin->predmet->naziv,
-                'vreme_pocetka' => $termin->vreme_pocetka,
-                'vreme_zavrsetka' => $termin->vreme_zavrsetka,
-                'sala' => $termin->sala,
-                'tip_nastave' => $termin->tip_nastave,
-                'vec_evidentiran' => in_array($termin->id, $evidentiraniTermini)
+            // Postavimo isti datum za poređenje
+            $terminPocetak->setDate($trenutnoVreme->year, $trenutnoVreme->month, $trenutnoVreme->day);
+            $terminKraj->setDate($trenutnoVreme->year, $trenutnoVreme->month, $trenutnoVreme->day);
+            
+            // Dozvoljen početak je 15 minuta pre početka termina
+            $dozvoljenPocetak = $terminPocetak->copy()->subMinutes(15);
+            
+            // Provera da li je danas taj dan u nedelji
+            $trenutniDan = $trenutnoVreme->englishDayOfWeek;
+            $daniMapa = [
+                'Monday' => 'Ponedeljak',
+                'Tuesday' => 'Utorak',
+                'Wednesday' => 'Sreda',
+                'Thursday' => 'Cetvrtak',
+                'Friday' => 'Petak',
+                'Saturday' => 'Subota',
+                'Sunday' => 'Nedelja'
             ];
-        });
-        
-        return response()->json($formattedTermini);
+
+            if ($daniMapa[$trenutniDan] !== $termin->dan_u_nedelji) {
+                return response()->json([
+                    'message' => "Danas nije dan za ovaj termin. Termin je {$termin->dan_u_nedelji}."
+                ], 400);
+            }
+
+            // Provera vremena
+            if ($trenutnoVreme > $terminKraj) {
+                return response()->json([
+                    'message' => "Termin je već završen. Ne možete evidentirati prisustvo nakon " . $terminKraj->format('H:i') . " časova."
+                ], 400);
+            }
+            
+            if ($trenutnoVreme < $dozvoljenPocetak) {
+                return response()->json([
+                    'message' => "Termin još nije počeo. Prisustvo možete evidentirati od " . $dozvoljenPocetak->format('H:i') . " časova."
+                ], 400);
+            }
+
+            // Provera da li je student već evidentirao prisustvo
+            $postojecePrisustvo = Prisustvo::where('student_id', $student->id)
+                ->where('raspored_predmet_id', $termin->id)
+                ->whereDate('datum_evidencije', Carbon::today())
+                ->exists();
+
+            if ($postojecePrisustvo) {
+                return response()->json([
+                    'message' => 'Već ste evidentirali prisustvo na ovom terminu danas.'
+                ], 400);
+            }
+
+            // Kreiranje novog prisustva
+            $prisustvo = Prisustvo::create([
+                'student_id' => $student->id,
+                'raspored_predmet_id' => $termin->id,
+                'datum_evidencije' => Carbon::today(),
+                'status_prisustva' => true // Postavljamo na true jer student sam evidentira svoje prisustvo
+            ]);
+
+            return response()->json([
+                'message' => 'Prisustvo je uspešno evidentirano.',
+                'data' => $prisustvo
+            ], 201);
+            
+        } catch (\Exception $e) {
+            \Log::error('Greška pri evidentiranju prisustva: ' . $e->getMessage(), [
+                'exception' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Došlo je do greške pri evidentiranju prisustva.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
 

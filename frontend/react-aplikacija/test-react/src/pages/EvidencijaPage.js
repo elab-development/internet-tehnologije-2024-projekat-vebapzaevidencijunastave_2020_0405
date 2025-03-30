@@ -267,40 +267,58 @@ const EvidencijaPage = () => {
           </div>
         </>
       ) : (
-        // Prikaz aktivnih termina
-        <div className="aktivni-termini">
-          <h2>Aktivni termini za danas</h2>
-          
-          {aktivniTermini.length === 0 ? (
-            <p className="no-results">Trenutno nema aktivnih termina.</p>
-          ) : (
-            <div className="termini-lista">
-              {aktivniTermini.map(termin => (
-                <div key={termin.id} className="termin-kartica">
-                  <h3>{termin.predmet.naziv}</h3>
-                  <p><strong>Vreme:</strong> {termin.vreme_pocetka.substring(0, 5)} - {termin.vreme_zavrsetka.substring(0, 5)}</p>
-                  <p><strong>Sala:</strong> {termin.sala}</p>
-                  <p><strong>Tip nastave:</strong> {termin.tip_nastave}</p>
-                  
-                  {termin.evidentiran ? (
-                    <button className="evidentirano-btn" disabled>Evidentirano</button>
-                  ) : (
-                    <button 
-                      className="evidentiraj-btn" 
-                      onClick={() => evidentirajPrisustvo(termin.id)}
-                    >
-                      Evidentiraj prisustvo
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <button className="refresh-btn" onClick={fetchAktivniTermini}>
-            Osveži listu termina
-          </button>
-        </div>
+        <>
+          <div className="aktivni-termini-container">
+            <h2>Aktivni termini za danas</h2>
+            <button className="refresh-btn" onClick={fetchAktivniTermini}>
+              Osveži listu termina
+            </button>
+            
+            {aktivniTermini.length === 0 ? (
+              <p className="no-results">Nema aktivnih termina za danas.</p>
+            ) : (
+              <table className="evidencija-table">
+                <thead>
+                  <tr>
+                    <th>Predmet</th>
+                    <th>Dan</th>
+                    <th>Vreme</th>
+                    <th>Sala</th>
+                    <th>Tip nastave</th>
+                    <th>Status</th>
+                    <th>Akcija</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {aktivniTermini.map((termin) => (
+                    <tr key={termin.id} className={termin.evidentiran ? "evidentiran" : ""}>
+                      <td>{termin.naziv}</td>
+                      <td>{termin.dan_u_nedelji}</td>
+                      <td>{`${termin.vreme_pocetka.substring(0, 5)} - ${termin.vreme_zavrsetka.substring(0, 5)}`}</td>
+                      <td>{termin.sala}</td>
+                      <td>{termin.tip_nastave}</td>
+                      <td>{termin.evidentiran ? "Evidentirano" : "Nije evidentirano"}</td>
+                      <td>
+                        {termin.evidentiran ? (
+                          <button className="evidentirano-btn" disabled>
+                            Evidentirano
+                          </button>
+                        ) : (
+                          <button 
+                            className="evidentiraj-btn"
+                            onClick={() => evidentirajPrisustvo(termin.id)}
+                          >
+                            Evidentiraj prisustvo
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
