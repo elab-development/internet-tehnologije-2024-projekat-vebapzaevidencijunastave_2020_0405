@@ -43,17 +43,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('admin/profile', [AdminController::class, 'getProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
     
-    // Nove rute za raspored
-    Route::get('student/raspored', [RasporedProfesorController::class, 'getStudentRaspored']);
-    Route::get('profesor/raspored', [RasporedProfesorController::class, 'getProfesorRaspored']);
-    Route::post('rasporedi/{rasporedId}/predmeti', [RasporedController::class, 'attachPredmet']);
+    // Rute za studenta
+    Route::prefix('student')->group(function () {
+        Route::get('/raspored', [RasporedProfesorController::class, 'getStudentRaspored']);
+        Route::get('/prisustva', [PrisustvoController::class, 'getStudentPrisustva']);
+        Route::get('/aktivni-termini', [PrisustvoController::class, 'getAktivniTermini']);
+        Route::post('/evidentiraj-prisustvo', [PrisustvoController::class, 'evidentirajPrisustvo']);
+    });
+});
 
-    // Nove rute za prisustvo
-    Route::get('student/prisustva', [PrisustvoController::class, 'getStudentPrisustva']);
-    Route::get('student/aktivni-termini', [PrisustvoController::class, 'getAktivniTermini']);
-    Route::post('student/evidentiraj-prisustvo', [PrisustvoController::class, 'evidentirajPrisustvo']);
-    
-    // Ruta za prikaz statistike prisustva po terminu (za profesora)
-    Route::get('prisustvo/termin/{rasporedPredmetId}/{datum?}', [PrisustvoController::class, 'countPrisustvoByTermin']);
+// Rute za profesora
+Route::middleware(['auth:sanctum', 'profesor'])->prefix('profesor')->group(function () {
+    Route::get('/raspored', [RasporedProfesorController::class, 'getProfesorRaspored']);
+    Route::get('/prisustva', [PrisustvoController::class, 'getProfesorPrisustva']);
+    Route::get('/prisustvo/termin/{rasporedPredmetId}/{datum?}', [PrisustvoController::class, 'countPrisustvoByTermin']);
 });
 

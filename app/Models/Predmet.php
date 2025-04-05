@@ -27,5 +27,11 @@ class Predmet extends Authenticatable
                    ->withPivot('dan_u_nedelji', 'vreme_pocetka', 'vreme_zavrsetka', 'sala', 'tip_nastave')
                    ->withTimestamps();
     }
+
+    // Relacija za raspored_predmet tabelu
+    public function rasporedPredmeti()
+    {
+        return $this->hasMany(RasporedPredmet::class, 'predmet_id');
+    }
 }
 

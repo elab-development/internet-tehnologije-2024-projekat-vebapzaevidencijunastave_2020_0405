@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Prisustvo;
 use App\Models\RasporedPredmet;
 use App\Models\Student;
+use App\Models\Profesor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -20,6 +21,13 @@ class PrisustvoController extends Controller
         'Saturday' => 'Subota',
         'Sunday' => 'Nedelja'
     ];
+
+    public function __construct()
+    {
+        // Postavljamo vremensku zonu za ceo kontroler
+        date_default_timezone_set('Europe/Belgrade');
+        Carbon::setLocale('sr');
+    }
 
     public function index()
     {
@@ -128,7 +136,7 @@ class PrisustvoController extends Controller
 }
 
     /**
-     * Dohvata prisustva za ulogovanog studenta
+     * Dohvata prisustva za ulogovanog studenta i evidentira odsustva za propuštene termine
      */
     public function getStudentPrisustva()
     {
@@ -141,8 +149,15 @@ class PrisustvoController extends Controller
         if (!($user instanceof Student)) {
             return response()->json(['message' => 'Pristup dozvoljen samo studentima'], 403);
         }
+
+        // Prvo ćemo evidentirati odsustva za propuštene termine
+        $this->evidentirajPropusteneTermine($user);
+        
+        // Dohvatamo samo prisustva od 1.3.2025.
+        $startDate = Carbon::create(2025, 3, 1);
         
         $prisustva = Prisustvo::where('student_id', $user->id)
+            ->where('datum_evidencije', '>=', $startDate)
             ->with(['rasporedPredmet.predmet'])
             ->orderBy('datum_evidencije', 'desc')
             ->get();
@@ -175,6 +190,59 @@ class PrisustvoController extends Controller
         
         return response()->json(array_values($predmeti));
     }
+
+    /**
+     * Evidentira odsustva za propuštene termine
+     */
+    private function evidentirajPropusteneTermine($student)
+    {
+        // Dohvatamo sve termine iz rasporeda za studentovu godinu
+        $termini = RasporedPredmet::whereHas('raspored', function($query) use ($student) {
+            $query->where('godina_studija', $student->godina_studija);
+        })->get();
+
+        $now = Carbon::now();
+        $startDate = Carbon::create(2025, 3, 1); // Početak evidencije od 1. marta 2025.
+
+        // Ako je trenutni datum pre početka evidencije, ne radimo ništa
+        if ($now < $startDate) {
+            return;
+        }
+
+        foreach ($termini as $termin) {
+            $checkDate = clone $startDate; // Počinjemo od 1. marta 2025.
+
+            while ($checkDate <= $now) {
+                // Proveravamo da li je dan u nedelji odgovarajući
+                if ($this->daniUNedelji[$checkDate->englishDayOfWeek] === $termin->dan_u_nedelji) {
+                    // Kreiramo vreme termina za taj datum
+                    $terminPocetak = Carbon::createFromTimeString($termin->vreme_pocetka)
+                        ->setDateFrom($checkDate);
+                    $terminKraj = Carbon::createFromTimeString($termin->vreme_zavrsetka)
+                        ->setDateFrom($checkDate);
+
+                    // Ako je termin već prošao i nije evidentirano prisustvo
+                    if ($terminKraj < $now) {
+                        $postojecePrisustvo = Prisustvo::where('student_id', $student->id)
+                            ->where('raspored_predmet_id', $termin->id)
+                            ->whereDate('datum_evidencije', $checkDate->format('Y-m-d'))
+                            ->first();
+
+                        if (!$postojecePrisustvo) {
+                            // Evidentiramo odsustvo
+                            Prisustvo::create([
+                                'student_id' => $student->id,
+                                'raspored_predmet_id' => $termin->id,
+                                'datum_evidencije' => $checkDate->format('Y-m-d'),
+                                'status_prisustva' => false // false označava odsustvo
+                            ]);
+                        }
+                    }
+                }
+                $checkDate->addDay();
+            }
+        }
+    }
     
     /**
      * Dohvata sve današnje termine za studenta
@@ -184,7 +252,7 @@ class PrisustvoController extends Controller
         $student = auth()->user();
         
         // Prvo dohvatamo današnji dan
-        $now = Carbon::now();
+        $now = Carbon::now('Europe/Belgrade');
         $daniUNedelji = [
             1 => 'Ponedeljak',
             2 => 'Utorak',
@@ -204,12 +272,22 @@ class PrisustvoController extends Controller
             ->where('dan_u_nedelji', $trenutniDan)
             ->orderBy('vreme_pocetka')
             ->get()
-            ->map(function($termin) use ($student) {
+            ->map(function($termin) use ($student, $now) {
                 // Proveravamo da li je student već evidentirao prisustvo
                 $evidentiran = Prisustvo::where('student_id', $student->id)
                     ->where('raspored_predmet_id', $termin->id)
-                    ->whereDate('datum_evidencije', Carbon::today())
+                    ->whereDate('datum_evidencije', $now->format('Y-m-d'))
                     ->exists();
+                
+                // Kreiramo vremena termina
+                $terminPocetak = Carbon::createFromTimeString($termin->vreme_pocetka, 'Europe/Belgrade')
+                    ->setDateFrom($now);
+                $terminKraj = Carbon::createFromTimeString($termin->vreme_zavrsetka, 'Europe/Belgrade')
+                    ->setDateFrom($now);
+                $dozvoljenPocetak = $terminPocetak->copy()->subMinutes(15);
+                
+                // Proveravamo da li je termin aktivan
+                $aktivan = $now->between($dozvoljenPocetak, $terminKraj);
                 
                 return [
                     'id' => $termin->id,
@@ -219,7 +297,10 @@ class PrisustvoController extends Controller
                     'vreme_zavrsetka' => $termin->vreme_zavrsetka,
                     'sala' => $termin->sala,
                     'tip_nastave' => $termin->tip_nastave,
-                    'evidentiran' => $evidentiran
+                    'evidentiran' => $evidentiran,
+                    'aktivan' => $aktivan,
+                    'dozvoljeno_od' => $dozvoljenPocetak->format('H:i'),
+                    'dozvoljeno_do' => $terminKraj->format('H:i')
                 ];
             });
 
@@ -239,10 +320,10 @@ class PrisustvoController extends Controller
             $termin = RasporedPredmet::findOrFail($request->raspored_predmet_id);
             $student = auth()->user();
 
-            // Provera vremena termina
-            $trenutnoVreme = Carbon::now();
-            $terminPocetak = Carbon::createFromTimeString($termin->vreme_pocetka);
-            $terminKraj = Carbon::createFromTimeString($termin->vreme_zavrsetka);
+            // Provera vremena termina sa tačnom vremenskom zonom
+            $trenutnoVreme = Carbon::now('Europe/Belgrade');
+            $terminPocetak = Carbon::createFromTimeString($termin->vreme_pocetka, 'Europe/Belgrade');
+            $terminKraj = Carbon::createFromTimeString($termin->vreme_zavrsetka, 'Europe/Belgrade');
             
             // Postavimo isti datum za poređenje
             $terminPocetak->setDate($trenutnoVreme->year, $trenutnoVreme->month, $trenutnoVreme->day);
@@ -252,18 +333,7 @@ class PrisustvoController extends Controller
             $dozvoljenPocetak = $terminPocetak->copy()->subMinutes(15);
             
             // Provera da li je danas taj dan u nedelji
-            $trenutniDan = $trenutnoVreme->englishDayOfWeek;
-            $daniMapa = [
-                'Monday' => 'Ponedeljak',
-                'Tuesday' => 'Utorak',
-                'Wednesday' => 'Sreda',
-                'Thursday' => 'Cetvrtak',
-                'Friday' => 'Petak',
-                'Saturday' => 'Subota',
-                'Sunday' => 'Nedelja'
-            ];
-
-            if ($daniMapa[$trenutniDan] !== $termin->dan_u_nedelji) {
+            if ($this->daniUNedelji[$trenutnoVreme->englishDayOfWeek] !== $termin->dan_u_nedelji) {
                 return response()->json([
                     'message' => "Danas nije dan za ovaj termin. Termin je {$termin->dan_u_nedelji}."
                 ], 400);
@@ -285,7 +355,7 @@ class PrisustvoController extends Controller
             // Provera da li je student već evidentirao prisustvo
             $postojecePrisustvo = Prisustvo::where('student_id', $student->id)
                 ->where('raspored_predmet_id', $termin->id)
-                ->whereDate('datum_evidencije', Carbon::today())
+                ->whereDate('datum_evidencije', $trenutnoVreme->format('Y-m-d'))
                 ->exists();
 
             if ($postojecePrisustvo) {
@@ -294,12 +364,12 @@ class PrisustvoController extends Controller
                 ], 400);
             }
 
-            // Kreiranje novog prisustva
+            // Kreiranje novog prisustva sa tačnim vremenom
             $prisustvo = Prisustvo::create([
                 'student_id' => $student->id,
                 'raspored_predmet_id' => $termin->id,
-                'datum_evidencije' => Carbon::today(),
-                'status_prisustva' => true // Postavljamo na true jer student sam evidentira svoje prisustvo
+                'datum_evidencije' => $trenutnoVreme->format('Y-m-d'),
+                'status_prisustva' => true
             ]);
 
             return response()->json([
@@ -316,6 +386,90 @@ class PrisustvoController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Dohvata sva prisustva studenata za predmete profesora
+     */
+    public function getProfesorPrisustva()
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Korisnik nije autentifikovan'], 401);
+        }
+        
+        $profesor = Auth::user();
+        
+        if (!($profesor instanceof Profesor)) {
+            return response()->json(['message' => 'Pristup dozvoljen samo profesorima'], 403);
+        }
+
+        // Dohvatamo sve predmete profesora
+        $predmeti = $profesor->predmeti()
+            ->with(['rasporedPredmeti' => function($query) {
+                $query->orderBy('dan_u_nedelji')
+                    ->orderBy('vreme_pocetka');
+            }])
+            ->get();
+
+        $rezultat = [];
+        
+        foreach ($predmeti as $predmet) {
+            $predmetData = [
+                'id' => $predmet->id,
+                'naziv' => $predmet->naziv,
+                'termini' => []
+            ];
+            
+            foreach ($predmet->rasporedPredmeti as $termin) {
+                $terminData = [
+                    'id' => $termin->id,
+                    'dan' => $termin->dan_u_nedelji,
+                    'vreme' => $termin->vreme_pocetka . ' - ' . $termin->vreme_zavrsetka,
+                    'sala' => $termin->sala,
+                    'tip_nastave' => $termin->tip_nastave,
+                    'prisustva' => []
+                ];
+                
+                // Dohvatamo sva prisustva za ovaj termin
+                $prisustva = Prisustvo::where('raspored_predmet_id', $termin->id)
+                    ->with(['student' => function($query) {
+                        $query->orderBy('broj_indeksa');
+                    }])
+                    ->where('datum_evidencije', '>=', Carbon::create(2025, 3, 1))
+                    ->orderBy('datum_evidencije', 'desc')
+                    ->get()
+                    ->groupBy('student_id');
+                
+                // Grupišemo prisustva po studentima
+                foreach ($prisustva as $studentId => $studentPrisustva) {
+                    $student = $studentPrisustva->first()->student;
+                    $prisustvaData = [];
+                    
+                    foreach ($studentPrisustva as $prisustvo) {
+                        $prisustvaData[] = [
+                            'datum' => Carbon::parse($prisustvo->datum_evidencije)->format('d.m.Y'),
+                            'status' => $prisustvo->status_prisustva
+                        ];
+                    }
+                    
+                    $terminData['prisustva'][] = [
+                        'student' => [
+                            'id' => $student->id,
+                            'ime' => $student->ime,
+                            'prezime' => $student->prezime,
+                            'broj_indeksa' => $student->broj_indeksa
+                        ],
+                        'evidencije' => $prisustvaData
+                    ];
+                }
+                
+                $predmetData['termini'][] = $terminData;
+            }
+            
+            $rezultat[] = $predmetData;
+        }
+        
+        return response()->json($rezultat);
     }
 }
 

@@ -1,0 +1,228 @@
+.admin-manager {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.manager-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.add-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.add-button:hover {
+  background-color: #45a049;
+}
+
+.admin-form {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="time"],
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.submit-button {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #1976D2;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.admin-table th {
+  background-color: #f5f5f5;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+}
+
+.admin-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.admin-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+  background-color: #da190b;
+}
+
+.error-message {
+  color: #f44336;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+/* Stilovi za RasporediManager */
+.raspored-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  padding: 20px;
+}
+
+.raspored-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.raspored-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.raspored-info {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.raspored-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+/* Modal stilovi */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal h3 {
+  margin-bottom: 20px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-button {
+  background-color: #9e9e9e;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cancel-button:hover {
+  background-color: #757575;
+}
+
+/* Responsive dizajn */
+@media (max-width: 768px) {
+  .raspored-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .raspored-actions {
+    width: 100%;
+  }
+
+  .raspored-actions button {
+    flex: 1;
+  }
+
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+} 

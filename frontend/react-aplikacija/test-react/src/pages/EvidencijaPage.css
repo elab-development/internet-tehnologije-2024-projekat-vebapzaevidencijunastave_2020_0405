@@ -257,3 +257,62 @@
         padding: 8px 5px;
     }
 }
+
+/* Stilovi za profesorski prikaz */
+.profesor-evidencija {
+    width: 95%;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.termini-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.termin-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.termin-card h3 {
+    color: #063f14;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.termin-card p {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.prisustvo-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.prisustvo-table th,
+.prisustvo-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.prisustvo-table th {
+    background-color: #063f14;
+    color: white;
+}
+
+.prisustvo-table tr.prisutan {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.prisustvo-table tr.odsutan {
+    background-color: rgba(244, 67, 54, 0.1);
+}

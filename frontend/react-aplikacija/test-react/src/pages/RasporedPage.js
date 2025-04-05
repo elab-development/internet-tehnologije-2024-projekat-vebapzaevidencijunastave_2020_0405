@@ -18,12 +18,9 @@ const RasporedPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [aktivniTermini, setAktivniTermini] = useState([]);
-  const [showOnlyAktivni, setShowOnlyAktivni] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showPrisustvoModal, setShowPrisustvoModal] = useState(false);
   const [prisustvoData, setPrisustvoData] = useState(null);
-  const [showAktivniTermini, setShowAktivniTermini] = useState(false);
-  const [showRefreshButton, setShowRefreshButton] = useState(false);
  
   useEffect(() => {
     const fetchRasporedi = async () => {
@@ -183,9 +180,7 @@ const RasporedPage = () => {
   const filtriraniPredmeti = predmeti.filter(item =>
     (filterPredmet ? item.naziv === filterPredmet : true) &&
     (filterDan ? item.dan_u_nedelji === filterDan : true) &&
-    (filterSala ? item.sala === filterSala : true) &&
-    // Ako je uključen filter za aktivne termine, prikazujemo samo aktivne
-    (showOnlyAktivni ? aktivniTermini.some(t => t.id === item.id) : true)
+    (filterSala ? item.sala === filterSala : true)
   );
   
   // Izvlačimo jedinstvene vrednosti za filtere
@@ -283,30 +278,7 @@ const RasporedPage = () => {
                 <option key={sala} value={sala}>{sala}</option>
               ))}
             </select>
-            
-            {user?.role === "student" && (
-              <div className="switch-container">
-                <label className="switch">
-                  <input 
-                    type="checkbox" 
-                    checked={showOnlyAktivni}
-                    onChange={() => setShowOnlyAktivni(!showOnlyAktivni)}
-                  />
-                  <span className="slider round"></span>
-                </label>
-                <span>Samo aktivni termini</span>
-              </div>
-            )}
           </div>
-          
-          {user?.role === "student" && aktivniTermini.length > 0 && (
-            <div className="aktivni-termini-info">
-              <p>Trenutno imate {aktivniTermini.length} aktivnih termina!</p>
-              <button className="refresh-btn" onClick={fetchAktivniTermini}>
-                Osveži aktivne termine
-              </button>
-            </div>
-          )}
           
           <div className="raspored-table">
             <table>

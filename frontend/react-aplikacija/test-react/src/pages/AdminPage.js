@@ -1,7 +1,120 @@
-import React from "react";
+import React, { useState } from 'react';
+import './AdminPage.css';
+import StudentiManager from '../components/admin/StudentiManager';
+import ProfesoriManager from '../components/admin/ProfesoriManager';
+import PredmetiManager from '../components/admin/PredmetiManager';
+import RasporediManager from '../components/admin/RasporediManager';
+import TerminiManager from '../components/admin/TerminiManager';
 
 const AdminPage = () => {
-  return <h1>Admin Panel - Upravljanje podacima</h1>;
+  const [activeSection, setActiveSection] = useState('dashboard');
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case 'studenti':
+        return <StudentiManager />;
+      case 'profesori':
+        return <ProfesoriManager />;
+      case 'predmeti':
+        return <PredmetiManager />;
+      case 'rasporedi':
+        return <RasporediManager />;
+      case 'termini':
+        return <TerminiManager />;
+      default:
+        return <Dashboard setActiveSection={setActiveSection} />;
+    }
+  };
+
+  return (
+    <div className="admin-container">
+      <nav className="admin-nav">
+        <div className="nav-brand">Admin Panel</div>
+        <ul className="nav-links">
+          <li>
+            <button 
+              className={activeSection === 'dashboard' ? 'active' : ''} 
+              onClick={() => setActiveSection('dashboard')}
+            >
+              Dashboard
+            </button>
+          </li>
+          <li>
+            <button 
+              className={activeSection === 'studenti' ? 'active' : ''} 
+              onClick={() => setActiveSection('studenti')}
+            >
+              Studenti
+            </button>
+          </li>
+          <li>
+            <button 
+              className={activeSection === 'profesori' ? 'active' : ''} 
+              onClick={() => setActiveSection('profesori')}
+            >
+              Profesori
+            </button>
+          </li>
+          <li>
+            <button 
+              className={activeSection === 'predmeti' ? 'active' : ''} 
+              onClick={() => setActiveSection('predmeti')}
+            >
+              Predmeti
+            </button>
+          </li>
+          <li>
+            <button 
+              className={activeSection === 'rasporedi' ? 'active' : ''} 
+              onClick={() => setActiveSection('rasporedi')}
+            >
+              Rasporedi
+            </button>
+          </li>
+          <li>
+            <button 
+              className={activeSection === 'termini' ? 'active' : ''} 
+              onClick={() => setActiveSection('termini')}
+            >
+              Termini
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <main className="admin-content">
+        {renderSection()}
+      </main>
+    </div>
+  );
+};
+
+// Dashboard komponenta sa karticama
+const Dashboard = ({ setActiveSection }) => {
+  const cards = [
+    { title: 'Studenti', icon: '👨‍🎓', section: 'studenti' },
+    { title: 'Profesori', icon: '👨‍🏫', section: 'profesori' },
+    { title: 'Predmeti', icon: '📚', section: 'predmeti' },
+    { title: 'Rasporedi', icon: '📅', section: 'rasporedi' },
+    { title: 'Termini', icon: '⏰', section: 'termini' }
+  ];
+
+  return (
+    <div className="dashboard">
+      <h1>Dobrodošli u Admin Panel</h1>
+      <div className="dashboard-cards">
+        {cards.map(card => (
+          <div 
+            key={card.section} 
+            className="dashboard-card"
+            onClick={() => setActiveSection(card.section)}
+          >
+            <div className="card-icon">{card.icon}</div>
+            <h3>{card.title}</h3>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default AdminPage;
