@@ -16,8 +16,8 @@ class Student extends Authenticatable
         'broj_indeksa',
         'email',
         'lozinka' ,
-        'godina_studija'
-        
+        'godina_studija',
+        'slika'
     ];
  
     protected $hidden = ['lozinka']; 

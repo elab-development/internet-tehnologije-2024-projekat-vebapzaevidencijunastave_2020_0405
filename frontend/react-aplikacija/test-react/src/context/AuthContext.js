@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     
     // Preusmeravanje na osnovu uloge
     if (role === "admin") {
-      navigate("/admin");
+      navigate("/"); // Admin ide prena početnu stranicu
     } else if (role === "profesor") {
       navigate("/profesor");
     } else {

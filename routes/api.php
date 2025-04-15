@@ -20,6 +20,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::resource('profesori', ProfesorController::class);
     Route::resource('predmeti', PredmetController::class);
     Route::resource('rasporedi', RasporedController::class);
+    Route::post('rasporedi/{id}/predmeti', [RasporedController::class, 'attachPredmet']);
     Route::resource('termini', TerminController::class);
     Route::resource('prisustva', PrisustvoController::class);
 });
@@ -49,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/prisustva', [PrisustvoController::class, 'getStudentPrisustva']);
         Route::get('/aktivni-termini', [PrisustvoController::class, 'getAktivniTermini']);
         Route::post('/evidentiraj-prisustvo', [PrisustvoController::class, 'evidentirajPrisustvo']);
+        Route::post('/profile/update', [StudentController::class, 'updateProfile']);
     });
 });
 
@@ -57,5 +59,6 @@ Route::middleware(['auth:sanctum', 'profesor'])->prefix('profesor')->group(funct
     Route::get('/raspored', [RasporedProfesorController::class, 'getProfesorRaspored']);
     Route::get('/prisustva', [PrisustvoController::class, 'getProfesorPrisustva']);
     Route::get('/prisustvo/termin/{rasporedPredmetId}/{datum?}', [PrisustvoController::class, 'countPrisustvoByTermin']);
+    Route::post('/profile/update', [ProfesorController::class, 'updateProfile']);
 });
 

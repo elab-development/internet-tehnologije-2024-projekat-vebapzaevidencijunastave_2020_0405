@@ -90,4 +90,27 @@ public function getProfile(Request $request)
     $student = $request->user();
     return response()->json($student);
 }
+
+public function updateProfile(Request $request)
+{
+    $student = $request->user();
+    
+    $validatedData = $request->validate([
+        'old_password' => 'required',
+        'new_password' => 'required|min:6'
+    ]);
+
+    // Provera stare lozinke
+    if (!Hash::check($validatedData['old_password'], $student->lozinka)) {
+        return response()->json(['message' => 'Trenutna lozinka nije ispravna'], 400);
+    }
+
+    // Postavljanje nove lozinke
+    $student->lozinka = Hash::make($validatedData['new_password']);
+    $student->save();
+
+    return response()->json([
+        'message' => 'Lozinka je uspešno izmenjena'
+    ]);
+}
 }

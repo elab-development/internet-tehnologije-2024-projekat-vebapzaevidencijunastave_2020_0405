@@ -88,5 +88,28 @@ class ProfesorController extends Controller
         $profesor->load('predmeti');
         return response()->json($profesor);
     }
+
+    public function updateProfile(Request $request)
+    {
+        $profesor = $request->user();
+        
+        $validatedData = $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|min:6'
+        ]);
+
+        // Provera stare lozinke
+        if (!Hash::check($validatedData['old_password'], $profesor->lozinka)) {
+            return response()->json(['message' => 'Trenutna lozinka nije ispravna'], 400);
+        }
+
+        // Postavljanje nove lozinke
+        $profesor->lozinka = Hash::make($validatedData['new_password']);
+        $profesor->save();
+
+        return response()->json([
+            'message' => 'Lozinka je uspešno izmenjena'
+        ]);
+    }
 }
 

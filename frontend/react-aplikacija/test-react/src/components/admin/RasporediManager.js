@@ -2,6 +2,20 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../api/axios';
 import './AdminManager.css';
 
+const TimeInput = ({ name, value, onChange, required }) => {
+  return (
+    <input
+      type="time"
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      step="300"
+      style={{width: "150px"}}
+    />
+  );
+};
+
 const RasporediManager = () => {
   const [rasporedi, setRasporedi] = useState([]);
   const [predmeti, setPredmeti] = useState([]);
@@ -261,8 +275,7 @@ const RasporediManager = () => {
               </div>
               <div className="form-group">
                 <label>Vreme početka:</label>
-                <input
-                  type="time"
+                <TimeInput
                   name="vreme_pocetka"
                   value={predmetFormData.vreme_pocetka}
                   onChange={handlePredmetInputChange}
@@ -271,8 +284,7 @@ const RasporediManager = () => {
               </div>
               <div className="form-group">
                 <label>Vreme završetka:</label>
-                <input
-                  type="time"
+                <TimeInput
                   name="vreme_zavrsetka"
                   value={predmetFormData.vreme_zavrsetka}
                   onChange={handlePredmetInputChange}
@@ -298,8 +310,8 @@ const RasporediManager = () => {
                   required
                 >
                   <option value="">Izaberite tip nastave</option>
-                  <option value="Predavanja">Predavanja</option>
-                  <option value="Vežbe">Vežbe</option>
+                  <option value="Predavanje">Predavanje</option>
+                  <option value="Vezbe">Vezbe</option>
                 </select>
               </div>
               <div className="button-group">

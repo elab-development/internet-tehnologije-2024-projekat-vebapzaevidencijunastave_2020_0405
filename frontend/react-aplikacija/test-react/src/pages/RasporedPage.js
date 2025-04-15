@@ -293,9 +293,9 @@ const RasporedPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filtriraniPredmeti.map(termin => (
+                {filtriraniPredmeti.map((termin, index) => (
                   <tr 
-                    key={`termin-${termin.id}`} 
+                    key={termin.id ? `termin-${termin.id}` : `termin-${index}`} 
                     className={isTerminAktivan(termin.id) ? "aktivan-termin" : ""}
                   >
                     <td>{termin.naziv}</td>

@@ -11,14 +11,25 @@ const ProfilPage = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    oldPassword: "",
+    newPassword: ""
+  });
+  const [editError, setEditError] = useState("");
 
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user) return;
 
       try {
-        const endpoint = `/api/${user.role}/profile`; // endpoint za profil
-        const response = await axios.get(endpoint);
+        const token = localStorage.getItem('auth_token');
+        const endpoint = `/api/${user.role}/profile`;
+        const response = await axios.get(endpoint, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setProfileData(response.data);
         setError(null);
       } catch (err) {
@@ -31,6 +42,33 @@ const ProfilPage = () => {
 
     fetchProfileData();
   }, [user]);
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditError("");
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      const endpoint = user.role === "profesor" ? '/api/profesor/profile/update' : '/api/student/profile/update';
+      const response = await axios.post(endpoint, {
+        old_password: editForm.oldPassword,
+        new_password: editForm.newPassword
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setShowEditModal(false);
+      setEditForm({
+        oldPassword: "",
+        newPassword: ""
+      });
+      alert("Lozinka je uspešno izmenjena!");
+    } catch (err) {
+      setEditError(err.response?.data?.message || 'Došlo je do greške pri izmeni lozinke.');
+    }
+  };
 
   if (!user) {
     navigate("/login");
@@ -85,11 +123,51 @@ const ProfilPage = () => {
             </>
           ) : null}
           <div className="buttons">
-            <button className="edit-button">Izmeni profil</button>
+            {(user?.role === "student" || user?.role === "profesor") && (
+              <button className="edit-button" onClick={() => setShowEditModal(true)}>
+                Izmeni profil
+              </button>
+            )}
             <button className="logout-button" onClick={logout}>Odjavi se</button>
           </div>
         </div>
       </div>
+
+      {showEditModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setShowEditModal(false)}>&times;</span>
+            <h2>Izmena lozinke</h2>
+            {editError && <div className="error-message">{editError}</div>}
+            <form onSubmit={handleEditSubmit}>
+              <div className="form-group">
+                <label>Trenutna lozinka:</label>
+                <input
+                  type="password"
+                  value={editForm.oldPassword}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, oldPassword: e.target.value }))}
+                  placeholder="Unesite trenutnu lozinku"
+                />
+              </div>
+              <div className="form-group">
+                <label>Nova lozinka:</label>
+                <input
+                  type="password"
+                  value={editForm.newPassword}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                  placeholder="Unesite novu lozinku"
+                />
+              </div>
+              <div className="form-buttons">
+                <button type="submit" className="save-button">Sačuvaj izmene</button>
+                <button type="button" className="cancel-button" onClick={() => setShowEditModal(false)}>
+                  Odustani
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
