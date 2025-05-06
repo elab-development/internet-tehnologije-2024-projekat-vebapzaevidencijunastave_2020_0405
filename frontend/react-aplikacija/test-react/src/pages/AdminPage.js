@@ -19,8 +19,6 @@ const AdminPage = () => {
         return <PredmetiManager />;
       case 'rasporedi':
         return <RasporediManager />;
-      case 'termini':
-        return <TerminiManager />;
       default:
         return <Dashboard setActiveSection={setActiveSection} />;
     }
@@ -28,58 +26,40 @@ const AdminPage = () => {
 
   return (
     <div className="admin-container">
-      <nav className="admin-nav">
+      <div className="admin-header">
         <div className="nav-brand">Admin Panel</div>
-        <ul className="nav-links">
-          <li>
-            <button 
-              className={activeSection === 'dashboard' ? 'active' : ''} 
-              onClick={() => setActiveSection('dashboard')}
-            >
-              Dashboard
-            </button>
-          </li>
-          <li>
-            <button 
-              className={activeSection === 'studenti' ? 'active' : ''} 
-              onClick={() => setActiveSection('studenti')}
-            >
-              Studenti
-            </button>
-          </li>
-          <li>
-            <button 
-              className={activeSection === 'profesori' ? 'active' : ''} 
-              onClick={() => setActiveSection('profesori')}
-            >
-              Profesori
-            </button>
-          </li>
-          <li>
-            <button 
-              className={activeSection === 'predmeti' ? 'active' : ''} 
-              onClick={() => setActiveSection('predmeti')}
-            >
-              Predmeti
-            </button>
-          </li>
-          <li>
-            <button 
-              className={activeSection === 'rasporedi' ? 'active' : ''} 
-              onClick={() => setActiveSection('rasporedi')}
-            >
-              Rasporedi
-            </button>
-          </li>
-          <li>
-            <button 
-              className={activeSection === 'termini' ? 'active' : ''} 
-              onClick={() => setActiveSection('termini')}
-            >
-              Termini
-            </button>
-          </li>
-        </ul>
+      </div>
+      <nav className="admin-nav-horizontal">
+        <button 
+          className={activeSection === 'dashboard' ? 'active' : ''} 
+          onClick={() => setActiveSection('dashboard')}
+        >
+          Dashboard
+        </button>
+        <button 
+          className={activeSection === 'studenti' ? 'active' : ''} 
+          onClick={() => setActiveSection('studenti')}
+        >
+          Studenti
+        </button>
+        <button 
+          className={activeSection === 'profesori' ? 'active' : ''} 
+          onClick={() => setActiveSection('profesori')}
+        >
+          Profesori
+        </button>
+        <button 
+          className={activeSection === 'predmeti' ? 'active' : ''} 
+          onClick={() => setActiveSection('predmeti')}
+        >
+          Predmeti
+        </button>
+        <button 
+          className={activeSection === 'rasporedi' ? 'active' : ''} 
+          onClick={() => setActiveSection('rasporedi')}
+        >
+          Rasporedi
+        </button>
       </nav>
       <main className="admin-content">
         {renderSection()}
@@ -94,8 +74,7 @@ const Dashboard = ({ setActiveSection }) => {
     { title: 'Studenti', icon: '👨‍🎓', section: 'studenti' },
     { title: 'Profesori', icon: '👨‍🏫', section: 'profesori' },
     { title: 'Predmeti', icon: '📚', section: 'predmeti' },
-    { title: 'Rasporedi', icon: '📅', section: 'rasporedi' },
-    { title: 'Termini', icon: '⏰', section: 'termini' }
+    { title: 'Rasporedi', icon: '📅', section: 'rasporedi' }
   ];
 
   return (

@@ -6,6 +6,9 @@ import HomePage from "./pages/HomePage";
 import RasporedPage from "./pages/RasporedPage";
 import EvidencijaPage from "./pages/EvidencijaPage";
 import ProfilPage from "./pages/ProfilPage";
+import AdminPage from "./pages/AdminPage";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("auth_token");
@@ -24,6 +27,16 @@ const PrivateRoute = ({ children }) => {
   );
 };
 
+const AdminRoute = ({ children }) => {
+  const { user } = useContext(AuthContext);
+  
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/" />;
+  }
+  
+  return children;
+};
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -32,6 +45,7 @@ const AppRouter = () => {
       <Route path="/raspored" element={<PrivateRoute><RasporedPage /></PrivateRoute>} />
       <Route path="/evidencija" element={<PrivateRoute><EvidencijaPage /></PrivateRoute>} />
       <Route path="/profil" element={<PrivateRoute><ProfilPage /></PrivateRoute>} />
+      <Route path="/admin" element={<PrivateRoute><AdminRoute><AdminPage /></AdminRoute></PrivateRoute>} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

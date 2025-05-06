@@ -1,49 +1,51 @@
 .admin-container {
-  display: flex;
   min-height: 100vh;
   background-color: #f5f5f5;
 }
 
-.admin-nav {
-  width: 250px;
+.admin-header {
+  width: 100%;
   background-color: #004225;
   color: white;
-  padding: 20px 0;
+  padding: 20px 0 10px 0;
 }
 
 .nav-brand {
   font-size: 1.5rem;
   font-weight: bold;
-  padding: 0 20px;
-  margin-bottom: 30px;
+  padding: 0 32px;
+  margin-bottom: 0;
 }
 
-.nav-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.admin-nav-horizontal {
+  display: flex;
+  gap: 16px;
+  background: #004225;
+  padding: 0 32px 0 32px;
+  border-bottom: 2px solid #e0e0e0;
 }
 
-.nav-links li button {
-  width: 100%;
-  padding: 15px 20px;
-  border: none;
+.admin-nav-horizontal button {
   background: none;
+  border: none;
   color: white;
-  text-align: left;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  padding: 18px 24px 14px 24px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  border-bottom: 3px solid transparent;
+  transition: background 0.2s, border-bottom 0.2s;
 }
 
-.nav-links li button:hover,
-.nav-links li button.active {
-  background-color: #006837;
+.admin-nav-horizontal button.active,
+.admin-nav-horizontal button:hover {
+  background: #006837;
+  border-bottom: 3px solid #fff;
 }
 
 .admin-content {
-  flex: 1;
-  padding: 30px;
+  max-width: 1100px;
+  margin: 32px auto 0 auto;
+  padding: 0 16px;
 }
 
 /* Dashboard stilovi */

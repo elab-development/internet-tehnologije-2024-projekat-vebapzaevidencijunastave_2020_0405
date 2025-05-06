@@ -43,30 +43,45 @@ import "./Navbar.css";
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation(); // Da znamo na kojoj smo stranici
+  const location = useLocation();
 
   if (!user) return null;
 
   const handleLogout = () => {
     logout();
-    setTimeout(() => navigate("/login"), 100); // Kratko kašnjenje da se izbegne bug
+    setTimeout(() => navigate("/login"), 100);
   };
 
-  // Proveravamo da li smo na Profil stranici
   const isProfilePage = location.pathname === "/profil";
 
+  // Ako je korisnik admin, prikazujemo samo admin link
+  if (user.role === 'admin') {
+    return (
+      <nav>
+        <ul>
+          <li><NavLink to="/admin">Admin Panel</NavLink></li>
+        </ul>
+        <div className="user-info">
+          <span>{user.ime} {user.prezime}</span>
+          {!isProfilePage && (
+            <button className="logout-btn" onClick={handleLogout}>Odjavi se</button>
+          )}
+        </div>
+      </nav>
+    );
+  }
+
+  // Za studente i profesore prikazujemo standardnu navigaciju
   return (
     <nav>
       <ul>
         <li><NavLink to="/">Početna</NavLink></li>
         <li><NavLink to="/raspored">Raspored</NavLink></li>
-        {(user?.role === "student" || user?.role === "profesor") && <li><NavLink to="/evidencija">Evidencija</NavLink></li>}
+        {(user.role === "student" || user.role === "profesor") && <li><NavLink to="/evidencija">Evidencija</NavLink></li>}
         <li><NavLink to="/profil">Profil</NavLink></li>
-        {user?.role === "admin" && <li><NavLink to="/admin">Admin</NavLink></li>}
       </ul>
       <div className="user-info">
-        <span>{user?.ime} {user?.prezime} {user?.godina_studija && `(${user.godina_studija}. godina)`}</span>
-        {/* Prikazujemo dugme samo ako NISMO na Profil stranici */}
+        <span>{user.ime} {user.prezime} {user.godina_studija && `(${user.godina_studija}. godina)`}</span>
         {!isProfilePage && (
           <button className="logout-btn" onClick={handleLogout}>Odjavi se</button>
         )}

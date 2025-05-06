@@ -60,7 +60,7 @@ class RasporedPredmet extends Model
                 'Monday' => 'Ponedeljak',
                 'Tuesday' => 'Utorak',
                 'Wednesday' => 'Sreda',
-                'Thursday' => 'Cetvrtak',
+                'Thursday' => 'Četvrtak',
                 'Friday' => 'Petak',
                 'Saturday' => 'Subota',
                 'Sunday' => 'Nedelja'
@@ -103,7 +103,7 @@ class RasporedPredmet extends Model
             'Monday' => 'Ponedeljak',
             'Tuesday' => 'Utorak',
             'Wednesday' => 'Sreda',
-            'Thursday' => 'Cetvrtak',
+            'Thursday' => 'Četvrtak',
             'Friday' => 'Petak',
             'Saturday' => 'Subota',
             'Sunday' => 'Nedelja'
