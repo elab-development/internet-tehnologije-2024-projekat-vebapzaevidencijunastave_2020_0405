@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import defaultAvatar from "../assets/profilna.webp";
 import "./ProfilPage.css";
 import axios from "../api/axios";
+import Card from '../components/Card';
+import Input from '../components/Input';
+import Button from '../components/Button';
 
 const ProfilPage = () => {
   const { user, logout } = useContext(AuthContext);
@@ -100,7 +103,7 @@ const ProfilPage = () => {
   return (
     <div className="profil-container">
       <h1>Moj Profil</h1>
-      <div className="profil-card">
+      <Card className="profil-card">
         <img src={profileData?.slika || defaultAvatar} alt="Profilna slika" className="profil-slika" />
         <div className="profil-info">
           <p><strong>Ime i prezime:</strong> {profileData?.ime} {profileData?.prezime}</p>
@@ -124,14 +127,24 @@ const ProfilPage = () => {
           ) : null}
           <div className="buttons">
             {(user?.role === "student" || user?.role === "profesor") && (
-              <button className="edit-button" onClick={() => setShowEditModal(true)}>
+              <Button
+                className="edit-button"
+                onClick={() => setShowEditModal(true)}
+                variant="primary"
+              >
                 Izmeni profil
-              </button>
+              </Button>
             )}
-            <button className="logout-button" onClick={logout}>Odjavi se</button>
+            <Button
+              className="logout-button"
+              onClick={logout}
+              variant="danger"
+            >
+              Odjavi se
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {showEditModal && (
         <div className="modal">
@@ -142,7 +155,7 @@ const ProfilPage = () => {
             <form onSubmit={handleEditSubmit}>
               <div className="form-group">
                 <label>Trenutna lozinka:</label>
-                <input
+                <Input
                   type="password"
                   value={editForm.oldPassword}
                   onChange={(e) => setEditForm(prev => ({ ...prev, oldPassword: e.target.value }))}
@@ -151,7 +164,7 @@ const ProfilPage = () => {
               </div>
               <div className="form-group">
                 <label>Nova lozinka:</label>
-                <input
+                <Input
                   type="password"
                   value={editForm.newPassword}
                   onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
@@ -159,10 +172,21 @@ const ProfilPage = () => {
                 />
               </div>
               <div className="form-buttons">
-                <button type="submit" className="save-button">Sačuvaj izmene</button>
-                <button type="button" className="cancel-button" onClick={() => setShowEditModal(false)}>
+                <Button
+                  type="submit"
+                  className="save-button"
+                  variant="primary"
+                >
+                  Sačuvaj izmene
+                </Button>
+                <Button
+                  type="button"
+                  className="cancel-button"
+                  onClick={() => setShowEditModal(false)}
+                  variant="secondary"
+                >
                   Odustani
-                </button>
+                </Button>
               </div>
             </form>
           </div>

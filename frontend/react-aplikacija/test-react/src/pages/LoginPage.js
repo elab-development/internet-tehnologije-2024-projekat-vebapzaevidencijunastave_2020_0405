@@ -4,6 +4,9 @@ import { AuthContext } from '../context/AuthContext';
 import "./LoginPage.css";
 import logo from "../assets/logo.png";
 import axios, { getCsrfToken } from '../api/axios';
+import Card from '../components/Card';
+import Input from '../components/Input';
+import Button from '../components/Button';
 
 const LoginPage = () => {
   const { login } = useContext(AuthContext);
@@ -65,33 +68,38 @@ const LoginPage = () => {
     <div className="login-container">
       <img src={logo} alt="FON Logo" className="login-logo" />
       <h1>Prijava</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
+      <Card className="login-card">
+        <form onSubmit={handleSubmit}>
+          <Input
             type="text"
             placeholder="Broj indeksa (2020/0405) ili korisničko ime"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
+            className="login-input"
           />
-        </div>
-        <div>
-          <input
+          <Input
             type="password"
             placeholder="Lozinka"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="login-input"
           />
-        </div>
-        {error && <p className="error-message">{error}</p>}
-        
-        <button type="submit" disabled={loading} className="login-button">
-          {loading ? "Prijavljivanje..." : "Prijavi se"}
-        </button>
+          {error && <p className="error-message">{error}</p>}
+          
+          <Button
+            type="submit"
+            disabled={loading}
+            className="login-button"
+            variant="primary"
+          >
+            {loading ? "Prijavljivanje..." : "Prijavi se"}
+          </Button>
 
-        {loading && <div className="spinner"></div>}
-      </form>
+          {loading && <div className="spinner"></div>}
+        </form>
+      </Card>
     </div>
   );
 };

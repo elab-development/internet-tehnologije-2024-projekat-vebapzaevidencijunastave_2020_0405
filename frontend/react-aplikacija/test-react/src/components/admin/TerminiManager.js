@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../api/axios';
 import './AdminManager.css';
+import Button from '../Button';
+import Input from '../Input';
+import Card from '../Card';
 
 const TerminiManager = () => {
   const [termini, setTermini] = useState([]);
@@ -107,87 +110,84 @@ const TerminiManager = () => {
     <div className="admin-manager">
       <div className="manager-header">
         <h2>Upravljanje Terminima</h2>
-        <button 
-          className="add-button"
+        <Button 
+          variant="primary"
           onClick={() => setShowForm(!showForm)}
         >
           {showForm ? 'Otkaži' : 'Dodaj Termin'}
-        </button>
+        </Button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="admin-form">
-          <div className="form-group">
-            <label>Predmet:</label>
-            <select
-              name="predmet_id"
-              value={formData.predmet_id}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Izaberite predmet</option>
-              {predmeti.map(predmet => (
-                <option key={predmet.id} value={predmet.id}>
-                  {predmet.naziv}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Datum:</label>
-            <input
+        <Card className="admin-form">
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Predmet:</label>
+              <select
+                name="predmet_id"
+                value={formData.predmet_id}
+                onChange={handleInputChange}
+                required
+                className="form-select"
+              >
+                <option value="">Izaberite predmet</option>
+                {predmeti.map(predmet => (
+                  <option key={predmet.id} value={predmet.id}>
+                    {predmet.naziv}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Input
+              label="Datum"
               type="date"
               name="datum"
               value={formData.datum}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Vreme početka:</label>
-            <input
+            <Input
+              label="Vreme početka"
               type="time"
               name="vreme_pocetka"
               value={formData.vreme_pocetka}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Vreme završetka:</label>
-            <input
+            <Input
+              label="Vreme završetka"
               type="time"
               name="vreme_zavrsetka"
               value={formData.vreme_zavrsetka}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Sala:</label>
-            <input
+            <Input
+              label="Sala"
               type="text"
               name="sala"
               value={formData.sala}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Tip nastave:</label>
-            <select
-              name="tip_nastave"
-              value={formData.tip_nastave}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Izaberite tip nastave</option>
-              <option value="Predavanja">Predavanja</option>
-              <option value="Vežbe">Vežbe</option>
-            </select>
-          </div>
-          <button type="submit" className="submit-button">Sačuvaj</button>
-        </form>
+            <div className="form-group">
+              <label>Tip nastave:</label>
+              <select
+                name="tip_nastave"
+                value={formData.tip_nastave}
+                onChange={handleInputChange}
+                required
+                className="form-select"
+              >
+                <option value="">Izaberite tip nastave</option>
+                <option value="predavanje">Predavanje</option>
+                <option value="vezbe">Vežbe</option>
+                <option value="laboratorija">Laboratorija</option>
+              </select>
+            </div>
+            <Button type="submit" variant="primary">Sačuvaj</Button>
+          </form>
+        </Card>
       )}
 
       <div className="table-container">
@@ -211,12 +211,12 @@ const TerminiManager = () => {
                 <td>{termin.sala}</td>
                 <td>{termin.tip_nastave}</td>
                 <td>
-                  <button
-                    className="delete-button"
+                  <Button
+                    variant="danger"
                     onClick={() => handleDelete(termin.id)}
                   >
                     Obriši
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}

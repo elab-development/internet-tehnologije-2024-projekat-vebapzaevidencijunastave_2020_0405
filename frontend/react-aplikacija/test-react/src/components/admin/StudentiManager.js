@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../api/axios';
 import './AdminManager.css';
+import Button from '../Button';
+import Input from '../Input';
+import Card from '../Card';
 
 const StudentiManager = () => {
   const [studenti, setStudenti] = useState([]);
@@ -84,83 +87,76 @@ const StudentiManager = () => {
     <div className="admin-manager">
       <div className="manager-header">
         <h2>Upravljanje Studentima</h2>
-        <button 
-          className="add-button"
+        <Button 
+          variant="primary"
           onClick={() => setShowForm(!showForm)}
         >
           {showForm ? 'Otkaži' : 'Dodaj Studenta'}
-        </button>
+        </Button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="admin-form">
-          <div className="form-group">
-            <label>Ime:</label>
-            <input
+        <Card className="admin-form">
+          <form onSubmit={handleSubmit}>
+            <Input
+              label="Ime"
               type="text"
               name="ime"
               value={formData.ime}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Prezime:</label>
-            <input
+            <Input
+              label="Prezime"
               type="text"
               name="prezime"
               value={formData.prezime}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Broj Indeksa:</label>
-            <input
+            <Input
+              label="Broj Indeksa"
               type="text"
               name="broj_indeksa"
               value={formData.broj_indeksa}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Email:</label>
-            <input
+            <Input
+              label="Email"
               type="email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Godina Studija:</label>
-            <select
-              name="godina_studija"
-              value={formData.godina_studija}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Izaberite godinu</option>
-              <option value="1">Prva godina</option>
-              <option value="2">Druga godina</option>
-              <option value="3">Treća godina</option>
-              <option value="4">Četvrta godina</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Lozinka:</label>
-            <input
+            <div className="form-group">
+              <label>Godina Studija:</label>
+              <select
+                name="godina_studija"
+                value={formData.godina_studija}
+                onChange={handleInputChange}
+                required
+                className="form-select"
+              >
+                <option value="">Izaberite godinu</option>
+                <option value="1">Prva godina</option>
+                <option value="2">Druga godina</option>
+                <option value="3">Treća godina</option>
+                <option value="4">Četvrta godina</option>
+              </select>
+            </div>
+            <Input
+              label="Lozinka"
               type="password"
               name="lozinka"
               value={formData.lozinka}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <button type="submit" className="submit-button">Sačuvaj</button>
-        </form>
+            <Button type="submit" variant="primary">Sačuvaj</Button>
+          </form>
+        </Card>
       )}
 
       <div className="table-container">
@@ -184,12 +180,12 @@ const StudentiManager = () => {
                 <td>{student.email}</td>
                 <td>{student.godina_studija}</td>
                 <td>
-                  <button 
-                    className="delete-button"
+                  <Button 
+                    variant="danger"
                     onClick={() => handleDelete(student.id)}
                   >
                     Obriši
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}

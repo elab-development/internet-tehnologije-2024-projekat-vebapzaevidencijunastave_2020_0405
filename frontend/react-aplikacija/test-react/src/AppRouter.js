@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Navbar from './components/Navbar';
+import Breadcrumbs from './components/Breadcrumbs';
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import RasporedPage from "./pages/RasporedPage";
@@ -13,7 +14,7 @@ import { AuthContext } from "./context/AuthContext";
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("auth_token");
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
+  const isHomePage = location.pathname === "/" || location.pathname === "/home";
 
   if (!token) {
     return <Navigate to="/login" />;
@@ -22,6 +23,7 @@ const PrivateRoute = ({ children }) => {
   return (
     <>
       {!isHomePage && <Navbar />}
+      {!isHomePage && <Breadcrumbs />}
       {children}
     </>
   );

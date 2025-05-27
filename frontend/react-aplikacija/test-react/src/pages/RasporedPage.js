@@ -3,7 +3,10 @@ import { AuthContext } from "../context/AuthContext";
 import "./RasporedPage.css";
 import rasporedPozadina from "../assets/rasporedPozadina.png";
 import axios from "../api/axios";
- 
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Input from '../components/Input';
+
 const RasporedPage = () => {
   const { user } = useContext(AuthContext);
   const [raspored, setRaspored] = useState(null);
@@ -21,7 +24,7 @@ const RasporedPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [showPrisustvoModal, setShowPrisustvoModal] = useState(false);
   const [prisustvoData, setPrisustvoData] = useState(null);
- 
+
   useEffect(() => {
     const fetchRasporedi = async () => {
       try {
@@ -176,7 +179,7 @@ const RasporedPage = () => {
       }
     }
   };
- 
+
   const filtriraniPredmeti = predmeti.filter(item =>
     (filterPredmet ? item.naziv === filterPredmet : true) &&
     (filterDan ? item.dan_u_nedelji === filterDan : true) &&
@@ -186,7 +189,7 @@ const RasporedPage = () => {
   // Izvlačimo jedinstvene vrednosti za filtere
   const uniquePredmeti = [...new Set(predmeti.map(item => item.naziv))];
   const uniqueSale = [...new Set(predmeti.map(item => item.sala))];
- 
+
   const prikaziDetalje = (termin) => {
     setSelectedTermin(termin);
     setShowModal(true);
@@ -202,25 +205,25 @@ const RasporedPage = () => {
     const aktivniTermin = aktivniTermini.find(t => t.id === terminId);
     return aktivniTermin ? aktivniTermin.evidentiran : false;
   };
- 
+
   if (loading) {
     return (
-      <div className="raspored-container" style={{ backgroundImage: `url(${rasporedPozadina})` }}>
-        <div className="loading">Učitavanje rasporeda...</div>
+      <div className="raspored-container">
+        <div className="loading">Učitavanje...</div>
       </div>
     );
   }
- 
+
   if (error) {
     return (
-      <div className="raspored-container" style={{ backgroundImage: `url(${rasporedPozadina})` }}>
+      <div className="raspored-container">
         <div className="error-message">{error}</div>
       </div>
     );
   }
- 
+
   return (
-    <div className="raspored-container" style={{ backgroundImage: `url(${rasporedPozadina})` }}>
+    <div className="raspored-container">
       <h1>Raspored časova</h1>
       
       {error && <div className="error-message">{error}</div>}
@@ -249,13 +252,12 @@ const RasporedPage = () => {
 
           <div className="raspored-info">
             {raspored && (
-              <>
+              <Card className="raspored-card">
                 <h2>{raspored.naziv}</h2>
                 <p>Školska godina: {raspored.skolska_godina}</p>
-                <p>Godina studija: {raspored.godina_studija}.</p>
-                <p>Semestar: {raspored.semestar}.</p>
-                {raspored.aktivan && <p className="aktivan-badge">Aktivan raspored</p>}
-              </>
+                <p>Semestar: {raspored.semestar}</p>
+                <p>Godina studija: {raspored.godina_studija}</p>
+              </Card>
             )}
           </div>
 
@@ -279,99 +281,87 @@ const RasporedPage = () => {
               ))}
             </select>
           </div>
-          
-          <div className="raspored-table">
-            <table>
+
+          <div className="raspored-table-container">
+            <table className="raspored-table">
               <thead>
                 <tr>
-                  <th>Predmet</th>
-                  <th>Dan</th>
                   <th>Vreme</th>
-                  <th>Sala</th>
-                  <th>Tip nastave</th>
-                  <th>Akcije</th>
+                  {dani.map(dan => (
+                    <th key={dan}>{dan}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {filtriraniPredmeti.map((termin, index) => (
-                  <tr 
-                    key={termin.id ? `termin-${termin.id}` : `termin-${index}`} 
-                    className={isTerminAktivan(termin.id) ? "aktivan-termin" : ""}
-                  >
-                    <td>{termin.naziv}</td>
-                    <td>{termin.dan_u_nedelji}</td>
-                    <td>
-                      {termin.vreme_pocetka && termin.vreme_zavrsetka 
-                        ? `${termin.vreme_pocetka.substring(0, 5)} - ${termin.vreme_zavrsetka.substring(0, 5)}`
-                        : 'Nije definisano'}
-                    </td>
-                    <td>{termin.sala}</td>
-                    <td>{termin.tip_nastave}</td>
-                    <td>
-                      <button className="details-btn" onClick={() => prikaziDetalje(termin)}>
-                        Detalji
-                      </button>
-                      
-                      {user?.role === "student" && isTerminAktivan(termin.id) && (
-                        isTerminEvidentiran(termin.id) ? (
-                          <button className="evidentirano-btn" disabled>Evidentirano</button>
-                        ) : (
-                          <button 
-                            className="evidentiraj-btn"
-                            onClick={() => evidentirajPrisustvo(termin.id)}
-                          >
-                            Evidentiraj prisustvo
-                          </button>
-                        )
-                      )}
-                    </td>
+                {['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'].map(vreme => (
+                  <tr key={vreme}>
+                    <td className="vreme-cell">{vreme}</td>
+                    {dani.map(dan => {
+                      const termin = filtriraniPredmeti.find(
+                        t => t.dan_u_nedelji === dan && 
+                        t.vreme_pocetka.substring(0, 5) === vreme
+                      );
+                      return (
+                        <td key={`${dan}-${vreme}`} className="termin-cell">
+                          {termin ? (
+                            <div className="termin-info">
+                              <h4>{termin.naziv}</h4>
+                              <p>{termin.vreme_pocetka.substring(0, 5)} - {termin.vreme_zavrsetka.substring(0, 5)}</p>
+                              <p>{termin.sala} - {termin.tip_nastave}</p>
+                              {user?.role === "student" && isTerminAktivan(termin.id) && (
+                                isTerminEvidentiran(termin.id) ? (
+                                  <Button className="evidentirano-btn" disabled variant="success">
+                                    Evidentirano
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    className="evidentiraj-btn"
+                                    onClick={() => evidentirajPrisustvo(termin.id)}
+                                    variant="primary"
+                                  >
+                                    Evidentiraj prisustvo
+                                  </Button>
+                                )
+                              )}
+                              <Button
+                                className="details-btn"
+                                onClick={() => prikaziDetalje(termin)}
+                                variant="secondary"
+                              >
+                                Detalji
+                              </Button>
+                            </div>
+                          ) : null}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          
-          {showModal && selectedTermin && (
-            <div className="modal">
-              <div className="modal-content">
-                <span className="close" onClick={() => setShowModal(false)}>&times;</span>
-                <h2>{selectedTermin.naziv}</h2>
-                <p><strong>Dan:</strong> {selectedTermin.dan_u_nedelji}</p>
-                <p><strong>Vreme:</strong> {
-                  selectedTermin.vreme_pocetka && selectedTermin.vreme_zavrsetka 
-                    ? `${selectedTermin.vreme_pocetka.substring(0, 5)} - ${selectedTermin.vreme_zavrsetka.substring(0, 5)}`
-                    : 'Nije definisano'
-                }</p>
-                <p><strong>Sala:</strong> {selectedTermin.sala}</p>
-                <p><strong>Tip nastave:</strong> {selectedTermin.tip_nastave}</p>
-                {selectedTermin.profesor && (
-                  <p><strong>Profesor:</strong> {selectedTermin.profesor.ime} {selectedTermin.profesor.prezime}</p>
-                )}
-                
-                {user?.role === "student" && isTerminAktivan(selectedTermin.id) && (
-                  isTerminEvidentiran(selectedTermin.id) ? (
-                    <div className="modal-status evidentirano">Prisustvo je već evidentirano za ovaj termin</div>
-                  ) : (
-                    <button 
-                      className="evidentiraj-btn modal-btn"
-                      onClick={() => {
-                        evidentirajPrisustvo(selectedTermin.id);
-                        setSelectedTermin(null);
-                      }}
-                    >
-                      Evidentiraj prisustvo
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
-          )}
         </>
+      )}
+
+      {showModal && selectedTermin && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setShowModal(false)}>&times;</span>
+            <h2>Detalji termina</h2>
+            <Card className="termin-details">
+              <h3>{selectedTermin.naziv}</h3>
+              <p><strong>Dan:</strong> {selectedTermin.dan_u_nedelji}</p>
+              <p><strong>Vreme:</strong> {selectedTermin.vreme_pocetka.substring(0, 5)} - {selectedTermin.vreme_zavrsetka.substring(0, 5)}</p>
+              <p><strong>Sala:</strong> {selectedTermin.sala}</p>
+              <p><strong>Tip nastave:</strong> {selectedTermin.tip_nastave}</p>
+            </Card>
+          </div>
+        </div>
       )}
     </div>
   );
 };
- 
+
 export default RasporedPage;
  
  

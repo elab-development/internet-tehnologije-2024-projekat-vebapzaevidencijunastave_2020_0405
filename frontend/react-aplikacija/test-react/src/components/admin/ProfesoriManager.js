@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../api/axios';
 import './AdminManager.css';
+import Button from '../Button';
+import Input from '../Input';
+import Card from '../Card';
 
 const ProfesoriManager = () => {
   const [profesori, setProfesori] = useState([]);
@@ -82,68 +85,60 @@ const ProfesoriManager = () => {
     <div className="admin-manager">
       <div className="manager-header">
         <h2>Upravljanje Profesorima</h2>
-        <button 
-          className="add-button"
+        <Button 
+          variant="primary"
           onClick={() => setShowForm(!showForm)}
         >
           {showForm ? 'Otkaži' : 'Dodaj Profesora'}
-        </button>
+        </Button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="admin-form">
-          <div className="form-group">
-            <label>Ime:</label>
-            <input
+        <Card className="admin-form">
+          <form onSubmit={handleSubmit}>
+            <Input
+              label="Ime"
               type="text"
               name="ime"
               value={formData.ime}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Prezime:</label>
-            <input
+            <Input
+              label="Prezime"
               type="text"
               name="prezime"
               value={formData.prezime}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Email:</label>
-            <input
+            <Input
+              label="Email"
               type="email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Korisničko ime:</label>
-            <input
+            <Input
+              label="Korisničko ime"
               type="text"
               name="korisnicko_ime"
               value={formData.korisnicko_ime}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Lozinka:</label>
-            <input
+            <Input
+              label="Lozinka"
               type="password"
               name="lozinka"
               value={formData.lozinka}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <button type="submit" className="submit-button">Sačuvaj</button>
-        </form>
+            <Button type="submit" variant="primary">Sačuvaj</Button>
+          </form>
+        </Card>
       )}
 
       <div className="table-container">
@@ -165,12 +160,12 @@ const ProfesoriManager = () => {
                 <td>{profesor.email}</td>
                 <td>{profesor.korisnicko_ime}</td>
                 <td>
-                  <button 
-                    className="delete-button"
+                  <Button 
+                    variant="danger"
                     onClick={() => handleDelete(profesor.id)}
                   >
                     Obriši
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}

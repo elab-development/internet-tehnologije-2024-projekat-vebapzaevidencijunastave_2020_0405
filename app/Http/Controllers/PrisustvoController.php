@@ -138,7 +138,7 @@ class PrisustvoController extends Controller
     /**
      * Dohvata prisustva za ulogovanog studenta i evidentira odsustva za propuštene termine
      */
-    public function getStudentPrisustva()
+    public function getStudentPrisustva(Request $request)
     {
         if (!Auth::check()) {
             return response()->json(['message' => 'Korisnik nije autentifikovan'], 401);
@@ -155,16 +155,17 @@ class PrisustvoController extends Controller
         
         // Dohvatamo samo prisustva od 1.3.2025.
         $startDate = Carbon::create(2025, 3, 1);
-        
+        $perPage = $request->input('per_page', 10);
+
         $prisustva = Prisustvo::where('student_id', $user->id)
             ->where('datum_evidencije', '>=', $startDate)
             ->with(['rasporedPredmet.predmet'])
             ->orderBy('datum_evidencije', 'desc')
-            ->get();
-            
+            ->paginate($perPage);
+
         // Organizujemo prisustva po predmetima
         $predmeti = [];
-        foreach ($prisustva as $prisustvo) {
+        foreach ($prisustva->items() as $prisustvo) {
             $predmet = $prisustvo->rasporedPredmet->predmet;
             $predmetId = $predmet->id;
             
@@ -187,8 +188,14 @@ class PrisustvoController extends Controller
                 ]
             ];
         }
-        
-        return response()->json(array_values($predmeti));
+
+        return response()->json([
+            'data' => array_values($predmeti),
+            'current_page' => $prisustva->currentPage(),
+            'last_page' => $prisustva->lastPage(),
+            'per_page' => $prisustva->perPage(),
+            'total' => $prisustva->total(),
+        ]);
     }
 
     /**

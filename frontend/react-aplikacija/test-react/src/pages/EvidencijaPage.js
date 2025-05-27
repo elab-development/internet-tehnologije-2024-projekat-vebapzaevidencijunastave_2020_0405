@@ -3,6 +3,11 @@ import { AuthContext } from "../context/AuthContext";
 import axios from "../api/axios";
 import "./EvidencijaPage.css";
 import rasporedPozadina from "../assets/rasporedPozadina.png";
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Input from '../components/Input';
+import usePagination from '../hooks/usePagination';
+import StatisticsChart from '../components/StatisticsChart';
 
 const EvidencijaPage = () => {
   const { user } = useContext(AuthContext);
@@ -16,6 +21,17 @@ const EvidencijaPage = () => {
   const [filterStatus, setFilterStatus] = useState("");
   const [activeTab, setActiveTab] = useState("prisustva");
   const [aktivniTermini, setAktivniTermini] = useState([]);
+  
+  // Koristimo custom hook za paginaciju
+  const {
+    currentPage,
+    perPage,
+    lastPage,
+    total,
+    nextPage,
+    prevPage,
+    updatePaginationData
+  } = usePagination(1, 10);
 
   // State za profesorski prikaz
   const [profesorPredmeti, setProfesorPredmeti] = useState([]);
@@ -40,8 +56,13 @@ const EvidencijaPage = () => {
         };
 
         if (user.role === "student") {
-          const response = await axios.get('/api/student/prisustva', config);
-          setPredmeti(response.data);
+          const response = await axios.get(`/api/student/prisustva?page=${currentPage}&per_page=${perPage}`, config);
+          setPredmeti(response.data.data);
+          updatePaginationData({
+            current_page: response.data.current_page,
+            last_page: response.data.last_page,
+            total: response.data.total
+          });
         } else if (user.role === "profesor") {
           const response = await axios.get('/api/profesor/prisustva', config);
           setProfesorPredmeti(response.data);
@@ -58,7 +79,7 @@ const EvidencijaPage = () => {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, currentPage, perPage, updatePaginationData]);
 
   // Funkcije za studentski prikaz
   const fetchAktivniTermini = async () => {
@@ -110,6 +131,50 @@ const EvidencijaPage = () => {
     }
   };
 
+  // Dodajemo funkciju za pripremu podataka za statistiku
+  const prepareStatisticsData = () => {
+    const predmetiStats = {};
+    
+    predmeti.forEach(item => {
+      if (!predmetiStats[item.predmet?.naziv]) {
+        predmetiStats[item.predmet?.naziv] = {
+          prisutan: 0,
+          odsutan: 0,
+          ukupno: 0
+        };
+      }
+      
+      predmetiStats[item.predmet?.naziv].ukupno++;
+      if (item.status === "Prisutan") {
+        predmetiStats[item.predmet?.naziv].prisutan++;
+      } else {
+        predmetiStats[item.predmet?.naziv].odsutan++;
+      }
+    });
+
+    const chartData = {
+      labels: Object.keys(predmetiStats),
+      datasets: [
+        {
+          label: 'Prisutan',
+          data: Object.values(predmetiStats).map(stat => stat.prisutan),
+          backgroundColor: 'rgba(76, 175, 80, 0.5)',
+          borderColor: 'rgba(76, 175, 80, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: 'Odsutan',
+          data: Object.values(predmetiStats).map(stat => stat.odsutan),
+          backgroundColor: 'rgba(244, 67, 54, 0.5)',
+          borderColor: 'rgba(244, 67, 54, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+
+    return chartData;
+  };
+
   // Komponenta za prikaz prisustva profesora
   const ProfesorEvidencija = () => {
     if (!profesorPredmeti.length) {
@@ -121,6 +186,56 @@ const EvidencijaPage = () => {
     if (!trenutniPredmet) {
       return <p className="no-results">Izaberite predmet.</p>;
     }
+
+    // Dodajemo funkciju za pripremu podataka za statistiku
+    const prepareStatisticsData = () => {
+      if (!trenutniPredmet) return null;
+
+      const terminStats = {};
+      
+      trenutniPredmet.termini.forEach(termin => {
+        termin.prisustva.forEach(p => {
+          p.evidencije.forEach(evidencija => {
+            if (!terminStats[termin.dan]) {
+              terminStats[termin.dan] = {
+                prisutan: 0,
+                odsutan: 0,
+                ukupno: 0
+              };
+            }
+            
+            terminStats[termin.dan].ukupno++;
+            if (evidencija.status) {
+              terminStats[termin.dan].prisutan++;
+            } else {
+              terminStats[termin.dan].odsutan++;
+            }
+          });
+        });
+      });
+
+      const chartData = {
+        labels: Object.keys(terminStats),
+        datasets: [
+          {
+            label: 'Prisutan',
+            data: Object.values(terminStats).map(stat => stat.prisutan),
+            backgroundColor: 'rgba(76, 175, 80, 0.5)',
+            borderColor: 'rgba(76, 175, 80, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Odsutan',
+            data: Object.values(terminStats).map(stat => stat.odsutan),
+            backgroundColor: 'rgba(244, 67, 54, 0.5)',
+            borderColor: 'rgba(244, 67, 54, 1)',
+            borderWidth: 1,
+          },
+        ],
+      };
+
+      return chartData;
+    };
 
     return (
       <div className="profesor-evidencija">
@@ -140,7 +255,7 @@ const EvidencijaPage = () => {
 
         <div className="termini-container">
           {trenutniPredmet.termini.map(termin => (
-            <div key={termin.id} className="termin-card">
+            <Card key={termin.id} className="termin-card">
               <h3>{termin.dan} {termin.vreme}</h3>
               <p>{termin.sala} - {termin.tip_nastave}</p>
               
@@ -166,8 +281,19 @@ const EvidencijaPage = () => {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </Card>
           ))}
+        </div>
+
+        <div className="statistics-container">
+          <Card className="statistics-card">
+            <h3>Statistika prisustva po terminima</h3>
+            <StatisticsChart 
+              data={prepareStatisticsData()} 
+              type="bar" 
+              title={`Prisustvo za predmet ${trenutniPredmet.naziv}`}
+            />
+          </Card>
         </div>
       </div>
     );
@@ -176,15 +302,15 @@ const EvidencijaPage = () => {
   // Komponenta za prikaz prisustva studenta
   const StudentEvidencija = () => {
     const svaEvidencija = predmeti.flatMap(predmet =>
-      predmet.prisustva.map(prisustvo => ({
-        predmetId: predmet.predmet.id,
-        predmetNaziv: predmet.predmet.naziv,
-        datum: prisustvo.datum,
-        status: prisustvo.status ? "Prisutan" : "Odsutan",
-        dan: prisustvo.termin.dan,
-        vreme: prisustvo.termin.vreme,
-        sala: prisustvo.termin.sala,
-        tip_nastave: prisustvo.termin.tip_nastave
+      (predmet?.prisustva || []).map(prisustvo => ({
+        predmetId: predmet?.predmet?.id ?? '',
+        predmetNaziv: predmet?.predmet?.naziv ?? 'Nepoznat predmet',
+        datum: prisustvo?.datum ?? '',
+        status: prisustvo?.status ? "Prisutan" : "Odsutan",
+        dan: prisustvo?.termin?.dan ?? '',
+        vreme: prisustvo?.termin?.vreme ?? '',
+        sala: prisustvo?.termin?.sala ?? '',
+        tip_nastave: prisustvo?.termin?.tip_nastave ?? ''
       }))
     );
 
@@ -197,22 +323,88 @@ const EvidencijaPage = () => {
     const uniquePredmeti = [...new Set(svaEvidencija.map(item => item.predmetNaziv))];
     const uniqueDatumi = [...new Set(svaEvidencija.map(item => item.datum))].sort().reverse();
 
+    // Dodajemo funkciju za pripremu podataka za statistiku
+    const prepareStatisticsData = () => {
+      const predmetiStats = {};
+      
+      svaEvidencija.forEach(item => {
+        if (!predmetiStats[item.predmetNaziv]) {
+          predmetiStats[item.predmetNaziv] = {
+            prisutan: 0,
+            odsutan: 0,
+            ukupno: 0
+          };
+        }
+        
+        predmetiStats[item.predmetNaziv].ukupno++;
+        if (item.status === "Prisutan") {
+          predmetiStats[item.predmetNaziv].prisutan++;
+        } else {
+          predmetiStats[item.predmetNaziv].odsutan++;
+        }
+      });
+
+      const chartData = {
+        labels: Object.keys(predmetiStats),
+        datasets: [
+          {
+            label: 'Prisutan',
+            data: Object.values(predmetiStats).map(stat => stat.prisutan),
+            backgroundColor: 'rgba(76, 175, 80, 0.5)',
+            borderColor: 'rgba(76, 175, 80, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Odsutan',
+            data: Object.values(predmetiStats).map(stat => stat.odsutan),
+            backgroundColor: 'rgba(244, 67, 54, 0.5)',
+            borderColor: 'rgba(244, 67, 54, 1)',
+            borderWidth: 1,
+          },
+        ],
+      };
+
+      return chartData;
+    };
+
     return (
       <>
         <div className="tabs">
-          <button 
+          <Button 
             className={`tab-button ${activeTab === "prisustva" ? "active" : ""}`}
             onClick={() => setActiveTab("prisustva")}
+            variant={activeTab === "prisustva" ? "primary" : "secondary"}
           >
             Moja prisustva
-          </button>
-          <button 
+          </Button>
+          <Button 
             className={`tab-button ${activeTab === "aktivni-termini" ? "active" : ""}`}
             onClick={() => setActiveTab("aktivni-termini")}
+            variant={activeTab === "aktivni-termini" ? "primary" : "secondary"}
           >
             Aktivni termini
-          </button>
+          </Button>
+          <Button 
+            className={`tab-button ${activeTab === "statistika" ? "active" : ""}`}
+            onClick={() => setActiveTab("statistika")}
+            variant={activeTab === "statistika" ? "primary" : "secondary"}
+          >
+            Statistika
+          </Button>
         </div>
+
+        {activeTab === "statistika" && (
+          <div className="statistics-container">
+            <Card className="statistics-card">
+              <h3>Statistika prisustva po predmetima</h3>
+              <StatisticsChart 
+                data={prepareStatisticsData()} 
+                type="bar" 
+                title="Prisustvo po predmetima"
+              />
+            </Card>
+          </div>
+        )}
 
         {activeTab === "prisustva" ? (
           <>
@@ -239,105 +431,92 @@ const EvidencijaPage = () => {
             {filtriraneEvidencije.length === 0 ? (
               <p className="no-results">Nema evidencija za zadate filtere.</p>
             ) : (
-              <table className="evidencija-table">
-                <thead>
-                  <tr>
-                    <th>Predmet</th>
-                    <th>Datum</th>
-                    <th>Dan</th>
-                    <th>Vreme</th>
-                    <th>Sala</th>
-                    <th>Tip nastave</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtriraneEvidencije.map((item, index) => (
-                    <tr key={index} className={item.status === "Prisutan" ? "prisutan" : "odsutan"}>
-                      <td>{item.predmetNaziv}</td>
-                      <td>{new Date(item.datum).toLocaleDateString('sr-RS')}</td>
-                      <td>{item.dan}</td>
-                      <td>{item.vreme}</td>
-                      <td>{item.sala}</td>
-                      <td>{item.tip_nastave}</td>
-                      <td>{item.status}</td>
+              <>
+                <table className="evidencija-table">
+                  <thead>
+                    <tr>
+                      <th>Predmet</th>
+                      <th>Datum</th>
+                      <th>Dan</th>
+                      <th>Vreme</th>
+                      <th>Sala</th>
+                      <th>Tip nastave</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            <div className="statistika">
-              <h3>Statistika prisustva</h3>
-              {predmeti.map(predmet => {
-                const ukupnoPrisutnih = predmet.prisustva.filter(p => p.status).length;
-                const ukupno = predmet.prisustva.length;
-                const procenat = ukupno > 0 ? Math.round((ukupnoPrisutnih / ukupno) * 100) : 0;
-                
-                return (
-                  <div key={predmet.predmet.id} className="predmet-statistika">
-                    <h4>{predmet.predmet.naziv}</h4>
-                    <div className="progress-bar">
-                      <div 
-                        className="progress" 
-                        style={{ width: `${procenat}%` }}
-                      ></div>
-                    </div>
-                    <p>{ukupnoPrisutnih} od {ukupno} časova ({procenat}%)</p>
+                  </thead>
+                  <tbody>
+                    {filtriraneEvidencije.map((item, index) => (
+                      <tr key={index} className={item.status === "Prisutan" ? "prisutan" : "odsutan"}>
+                        <td>{item.predmetNaziv}</td>
+                        <td>{new Date(item.datum).toLocaleDateString('sr-RS')}</td>
+                        <td>{item.dan}</td>
+                        <td>{item.vreme}</td>
+                        <td>{item.sala}</td>
+                        <td>{item.tip_nastave}</td>
+                        <td>{item.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {lastPage > 1 && (
+                  <div className="pagination">
+                    <Button
+                      onClick={prevPage}
+                      disabled={currentPage === 1}
+                      variant="secondary"
+                    >
+                      Prethodna
+                    </Button>
+                    <span className="page-info">
+                      Strana {currentPage} od {lastPage}
+                    </span>
+                    <Button
+                      onClick={nextPage}
+                      disabled={currentPage === lastPage}
+                      variant="secondary"
+                    >
+                      Sledeća
+                    </Button>
                   </div>
-                );
-              })}
-            </div>
+                )}
+              </>
+            )}
           </>
         ) : (
-          <div className="aktivni-termini-container">
-            <h2>Aktivni termini za danas</h2>
-            <button className="refresh-btn" onClick={fetchAktivniTermini}>
-              Osveži listu termina
-            </button>
-            
+          <div className="aktivni-termini">
+            <Button
+              className="refresh-btn"
+              onClick={fetchAktivniTermini}
+              variant="secondary"
+            >
+              Osveži listu
+            </Button>
+
             {aktivniTermini.length === 0 ? (
-              <p className="no-results">Nema aktivnih termina za danas.</p>
+              <p className="no-results">Trenutno nema aktivnih termina.</p>
             ) : (
-              <table className="evidencija-table">
-                <thead>
-                  <tr>
-                    <th>Predmet</th>
-                    <th>Dan</th>
-                    <th>Vreme</th>
-                    <th>Sala</th>
-                    <th>Tip nastave</th>
-                    <th>Status</th>
-                    <th>Akcija</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aktivniTermini.map((termin) => (
-                    <tr key={termin.id} className={termin.evidentiran ? "evidentiran" : ""}>
-                      <td>{termin.naziv}</td>
-                      <td>{termin.dan_u_nedelji}</td>
-                      <td>{`${termin.vreme_pocetka.substring(0, 5)} - ${termin.vreme_zavrsetka.substring(0, 5)}`}</td>
-                      <td>{termin.sala}</td>
-                      <td>{termin.tip_nastave}</td>
-                      <td>{termin.evidentiran ? "Evidentirano" : "Nije evidentirano"}</td>
-                      <td>
-                        {termin.evidentiran ? (
-                          <button className="evidentirano-btn" disabled>
-                            Evidentirano
-                          </button>
-                        ) : (
-                          <button 
-                            className="evidentiraj-btn"
-                            onClick={() => evidentirajPrisustvo(termin.id)}
-                          >
-                            Evidentiraj prisustvo
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="termini-grid">
+                {aktivniTermini.map(termin => (
+                  <Card key={termin.id} className="termin-card">
+                    <h3>{termin.predmet?.naziv ?? termin.naziv ?? 'Nepoznat predmet'}</h3>
+                    <p>{termin.dan ?? termin.dan_u_nedelji ?? ''} {termin.vreme ?? (termin.vreme_pocetka ? `${termin.vreme_pocetka} - ${termin.vreme_zavrsetka}` : '')}</p>
+                    <p>{termin.sala ?? ''} - {termin.tip_nastave ?? ''}</p>
+                    {termin.evidentirano ? (
+                      <Button className="evidentirano-btn" disabled variant="success">
+                        Evidentirano
+                      </Button>
+                    ) : (
+                      <Button
+                        className="evidentiraj-btn"
+                        onClick={() => evidentirajPrisustvo(termin.id)}
+                        variant="primary"
+                      >
+                        Evidentiraj prisustvo
+                      </Button>
+                    )}
+                  </Card>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -347,24 +526,24 @@ const EvidencijaPage = () => {
 
   if (loading) {
     return (
-      <div className="evidencija-container" style={{ backgroundImage: `url(${rasporedPozadina})` }}>
-        <div className="loading">Učitavanje evidencije prisustva...</div>
+      <div className="evidencija-container">
+        <div className="loading">Učitavanje...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="evidencija-container" style={{ backgroundImage: `url(${rasporedPozadina})` }}>
+      <div className="evidencija-container">
         <div className="error-message">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="evidencija-container" style={{ backgroundImage: `url(${rasporedPozadina})` }}>
+    <div className="evidencija-container">
       <h1>Evidencija prisustva</h1>
-      {user?.role === "student" ? <StudentEvidencija /> : <ProfesorEvidencija />}
+      {user?.role === "profesor" ? <ProfesorEvidencija /> : <StudentEvidencija />}
     </div>
   );
 };

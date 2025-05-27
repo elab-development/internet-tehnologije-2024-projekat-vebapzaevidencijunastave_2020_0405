@@ -75,7 +75,7 @@ const Navbar = () => {
   return (
     <nav>
       <ul>
-        <li><NavLink to="/">Početna</NavLink></li>
+        {/* <li><NavLink to="/">Početna</NavLink></li> */}
         <li><NavLink to="/raspored">Raspored</NavLink></li>
         {(user.role === "student" || user.role === "profesor") && <li><NavLink to="/evidencija">Evidencija</NavLink></li>}
         <li><NavLink to="/profil">Profil</NavLink></li>

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../api/axios';
 import './AdminManager.css';
+import Button from '../Button';
+import Input from '../Input';
+import Card from '../Card';
 
 const TimeInput = ({ name, value, onChange, required }) => {
   return (
-    <input
+    <Input
       type="time"
       name={name}
       value={value}
@@ -160,57 +163,57 @@ const RasporediManager = () => {
     <div className="admin-manager">
       <div className="manager-header">
         <h2>Upravljanje Rasporedima</h2>
-        <button 
-          className="add-button"
+        <Button 
+          variant="primary"
           onClick={() => setShowForm(!showForm)}
         >
           {showForm ? 'Otkaži' : 'Dodaj Raspored'}
-        </button>
+        </Button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="admin-form">
-          <div className="form-group">
-            <label>Naziv rasporeda:</label>
-            <input
+        <Card className="admin-form">
+          <form onSubmit={handleSubmit}>
+            <Input
+              label="Naziv rasporeda"
               type="text"
               name="naziv"
               value={formData.naziv}
               onChange={handleInputChange}
               required
             />
-          </div>
-          <div className="form-group">
-            <label>Godina studija:</label>
-            <select
-              name="godina_studija"
-              value={formData.godina_studija}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Izaberite godinu</option>
-              <option value="1">Prva godina</option>
-              <option value="2">Druga godina</option>
-              <option value="3">Treća godina</option>
-              <option value="4">Četvrta godina</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Semestar:</label>
-            <select
-              name="semestar"
-              value={formData.semestar}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Izaberite semestar</option>
-              <option value="1">Prvi</option>
-              <option value="2">Drugi</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Školska godina:</label>
-            <input
+            <div className="form-group">
+              <label>Godina studija:</label>
+              <select
+                name="godina_studija"
+                value={formData.godina_studija}
+                onChange={handleInputChange}
+                required
+                className="form-select"
+              >
+                <option value="">Izaberite godinu</option>
+                <option value="1">Prva godina</option>
+                <option value="2">Druga godina</option>
+                <option value="3">Treća godina</option>
+                <option value="4">Četvrta godina</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Semestar:</label>
+              <select
+                name="semestar"
+                value={formData.semestar}
+                onChange={handleInputChange}
+                required
+                className="form-select"
+              >
+                <option value="">Izaberite semestar</option>
+                <option value="1">Prvi</option>
+                <option value="2">Drugi</option>
+              </select>
+            </div>
+            <Input
+              label="Školska godina"
               type="text"
               name="skolska_godina"
               value={formData.skolska_godina}
@@ -218,27 +221,27 @@ const RasporediManager = () => {
               placeholder="npr. 2024/2025"
               required
             />
-          </div>
-          <div className="form-group">
-            <label>
-              <input
-                type="checkbox"
-                name="aktivan"
-                checked={formData.aktivan}
-                onChange={handleInputChange}
-              />
-              Aktivan raspored
-            </label>
-          </div>
-          <button type="submit" className="submit-button">Sačuvaj</button>
-        </form>
+            <div className="form-group">
+              <label>
+                <input
+                  type="checkbox"
+                  name="aktivan"
+                  checked={formData.aktivan}
+                  onChange={handleInputChange}
+                />
+                Aktivan raspored
+              </label>
+            </div>
+            <Button type="submit" variant="primary">Sačuvaj</Button>
+          </form>
+        </Card>
       )}
 
       {showAddPredmetForm && selectedRaspored && (
         <div className="overlay">
-          <div className="modal">
+          <Card className="modal">
             <h3>Dodaj predmet u raspored: {selectedRaspored.naziv}</h3>
-            <form onSubmit={handleAddPredmet} className="admin-form">
+            <form onSubmit={handleAddPredmet}>
               <div className="form-group">
                 <label>Predmet:</label>
                 <select
@@ -246,15 +249,14 @@ const RasporediManager = () => {
                   value={predmetFormData.predmet_id}
                   onChange={handlePredmetInputChange}
                   required
+                  className="form-select"
                 >
                   <option value="">Izaberite predmet</option>
-                  {predmeti
-                    .filter(p => p.godina_studija === selectedRaspored.godina_studija)
-                    .map(predmet => (
-                      <option key={predmet.id} value={predmet.id}>
-                        {predmet.naziv}
-                      </option>
-                    ))}
+                  {predmeti.map(predmet => (
+                    <option key={predmet.id} value={predmet.id}>
+                      {predmet.naziv}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
@@ -264,13 +266,14 @@ const RasporediManager = () => {
                   value={predmetFormData.dan_u_nedelji}
                   onChange={handlePredmetInputChange}
                   required
+                  className="form-select"
                 >
                   <option value="">Izaberite dan</option>
-                  <option value="Ponedeljak">Ponedeljak</option>
-                  <option value="Utorak">Utorak</option>
-                  <option value="Sreda">Sreda</option>
-                  <option value="Četvrtak">Četvrtak</option>
-                  <option value="Petak">Petak</option>
+                  <option value="1">Ponedeljak</option>
+                  <option value="2">Utorak</option>
+                  <option value="3">Sreda</option>
+                  <option value="4">Četvrtak</option>
+                  <option value="5">Petak</option>
                 </select>
               </div>
               <div className="form-group">
@@ -291,16 +294,14 @@ const RasporediManager = () => {
                   required
                 />
               </div>
-              <div className="form-group">
-                <label>Sala:</label>
-                <input
-                  type="text"
-                  name="sala"
-                  value={predmetFormData.sala}
-                  onChange={handlePredmetInputChange}
-                  required
-                />
-              </div>
+              <Input
+                label="Sala"
+                type="text"
+                name="sala"
+                value={predmetFormData.sala}
+                onChange={handlePredmetInputChange}
+                required
+              />
               <div className="form-group">
                 <label>Tip nastave:</label>
                 <select
@@ -308,92 +309,68 @@ const RasporediManager = () => {
                   value={predmetFormData.tip_nastave}
                   onChange={handlePredmetInputChange}
                   required
+                  className="form-select"
                 >
                   <option value="">Izaberite tip nastave</option>
-                  <option value="Predavanje">Predavanje</option>
-                  <option value="Vezbe">Vezbe</option>
+                  <option value="predavanje">Predavanje</option>
+                  <option value="vezbe">Vežbe</option>
+                  <option value="laboratorija">Laboratorija</option>
                 </select>
               </div>
-              <div className="button-group">
-                <button type="submit" className="submit-button">Dodaj</button>
-                <button 
-                  type="button" 
-                  className="cancel-button"
-                  onClick={() => {
-                    setShowAddPredmetForm(false);
-                    setSelectedRaspored(null);
-                  }}
-                >
-                  Otkaži
-                </button>
-              </div>
+              <Button type="submit" variant="primary">Dodaj</Button>
+              <Button 
+                type="button" 
+                variant="secondary"
+                onClick={() => setShowAddPredmetForm(false)}
+              >
+                Otkaži
+              </Button>
             </form>
-          </div>
+          </Card>
         </div>
       )}
 
       <div className="table-container">
-        {rasporedi.map(raspored => (
-          <div key={raspored.id} className="raspored-card">
-            <div className="raspored-header">
-              <h3>{raspored.naziv}</h3>
-              <div className="raspored-actions">
-                <button
-                  className="add-button"
-                  onClick={() => {
-                    setSelectedRaspored(raspored);
-                    setShowAddPredmetForm(true);
-                  }}
-                >
-                  Dodaj predmet
-                </button>
-                <button
-                  className="delete-button"
-                  onClick={() => handleDelete(raspored.id)}
-                >
-                  Obriši raspored
-                </button>
-              </div>
-            </div>
-            <div className="raspored-info">
-              <p>Godina studija: {raspored.godina_studija}. godina</p>
-              <p>Semestar: {raspored.semestar}. semestar</p>
-              <p>Školska godina: {raspored.skolska_godina}</p>
-              <p>Status: {raspored.aktivan ? 'Aktivan' : 'Neaktivan'}</p>
-            </div>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Predmet</th>
-                  <th>Dan</th>
-                  <th>Vreme</th>
-                  <th>Sala</th>
-                  <th>Tip nastave</th>
-                  <th>Akcije</th>
-                </tr>
-              </thead>
-              <tbody>
-                {raspored.predmeti?.map(predmet => (
-                  <tr key={`${raspored.id}-${predmet.id}`}>
-                    <td>{predmet.naziv}</td>
-                    <td>{predmet.pivot.dan_u_nedelji}</td>
-                    <td>{predmet.pivot.vreme_pocetka} - {predmet.pivot.vreme_zavrsetka}</td>
-                    <td>{predmet.pivot.sala}</td>
-                    <td>{predmet.pivot.tip_nastave}</td>
-                    <td>
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDeletePredmet(raspored.id, predmet.id)}
-                      >
-                        Ukloni
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ))}
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Naziv</th>
+              <th>Godina</th>
+              <th>Semestar</th>
+              <th>Školska godina</th>
+              <th>Status</th>
+              <th>Akcije</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rasporedi.map(raspored => (
+              <tr key={raspored.id}>
+                <td>{raspored.naziv}</td>
+                <td>{raspored.godina_studija}. godina</td>
+                <td>{raspored.semestar}. semestar</td>
+                <td>{raspored.skolska_godina}</td>
+                <td>{raspored.aktivan ? 'Aktivan' : 'Neaktivan'}</td>
+                <td>
+                  <Button 
+                    variant="primary"
+                    onClick={() => {
+                      setSelectedRaspored(raspored);
+                      setShowAddPredmetForm(true);
+                    }}
+                  >
+                    Dodaj predmet
+                  </Button>
+                  <Button 
+                    variant="danger"
+                    onClick={() => handleDelete(raspored.id)}
+                  >
+                    Obriši
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

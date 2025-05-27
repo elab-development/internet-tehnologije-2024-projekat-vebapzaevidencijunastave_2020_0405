@@ -5,6 +5,8 @@ import ProfesoriManager from '../components/admin/ProfesoriManager';
 import PredmetiManager from '../components/admin/PredmetiManager';
 import RasporediManager from '../components/admin/RasporediManager';
 import TerminiManager from '../components/admin/TerminiManager';
+import Card from '../components/Card';
+import Button from '../components/Button';
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -30,36 +32,41 @@ const AdminPage = () => {
         <div className="nav-brand">Admin Panel</div>
       </div>
       <nav className="admin-nav-horizontal">
-        <button 
+        <Button 
           className={activeSection === 'dashboard' ? 'active' : ''} 
           onClick={() => setActiveSection('dashboard')}
+          variant={activeSection === 'dashboard' ? 'primary' : 'secondary'}
         >
           Dashboard
-        </button>
-        <button 
+        </Button>
+        <Button 
           className={activeSection === 'studenti' ? 'active' : ''} 
           onClick={() => setActiveSection('studenti')}
+          variant={activeSection === 'studenti' ? 'primary' : 'secondary'}
         >
           Studenti
-        </button>
-        <button 
+        </Button>
+        <Button 
           className={activeSection === 'profesori' ? 'active' : ''} 
           onClick={() => setActiveSection('profesori')}
+          variant={activeSection === 'profesori' ? 'primary' : 'secondary'}
         >
           Profesori
-        </button>
-        <button 
+        </Button>
+        <Button 
           className={activeSection === 'predmeti' ? 'active' : ''} 
           onClick={() => setActiveSection('predmeti')}
+          variant={activeSection === 'predmeti' ? 'primary' : 'secondary'}
         >
           Predmeti
-        </button>
-        <button 
+        </Button>
+        <Button 
           className={activeSection === 'rasporedi' ? 'active' : ''} 
           onClick={() => setActiveSection('rasporedi')}
+          variant={activeSection === 'rasporedi' ? 'primary' : 'secondary'}
         >
           Rasporedi
-        </button>
+        </Button>
       </nav>
       <main className="admin-content">
         {renderSection()}
@@ -82,14 +89,14 @@ const Dashboard = ({ setActiveSection }) => {
       <h1>Dobrodošli u Admin Panel</h1>
       <div className="dashboard-cards">
         {cards.map(card => (
-          <div 
+          <Card 
             key={card.section} 
             className="dashboard-card"
             onClick={() => setActiveSection(card.section)}
           >
             <div className="card-icon">{card.icon}</div>
             <h3>{card.title}</h3>
-          </div>
+          </Card>
         ))}
       </div>
     </div>
