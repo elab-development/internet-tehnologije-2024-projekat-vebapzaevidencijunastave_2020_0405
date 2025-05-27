@@ -38,6 +38,9 @@ const EvidencijaPage = () => {
   const [selectedPredmet, setSelectedPredmet] = useState(null);
   const [selectedTermin, setSelectedTermin] = useState(null);
 
+  const [statisticsType, setStatisticsType] = useState('bar');
+  const [statisticsFilter, setStatisticsFilter] = useState('all');
+
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -131,10 +134,11 @@ const EvidencijaPage = () => {
     }
   };
 
-  // Dodajemo funkciju za pripremu podataka za statistiku
-  const prepareStatisticsData = () => {
+  // Funkcija za statistiku za profesorski prikaz (koristi predmeti)
+  const prepareStatisticsDataProfesor = (predmeti, type = 'bar', filter = 'all') => {
     const predmetiStats = {};
-    
+    const mesecStats = {};
+    const tipNastaveStats = {};
     predmeti.forEach(item => {
       if (!predmetiStats[item.predmet?.naziv]) {
         predmetiStats[item.predmet?.naziv] = {
@@ -143,36 +147,117 @@ const EvidencijaPage = () => {
           ukupno: 0
         };
       }
-      
       predmetiStats[item.predmet?.naziv].ukupno++;
       if (item.status === "Prisutan") {
         predmetiStats[item.predmet?.naziv].prisutan++;
       } else {
         predmetiStats[item.predmet?.naziv].odsutan++;
       }
+      const mesec = new Date(item.datum).toLocaleString('sr-RS', { month: 'long' });
+      if (!mesecStats[mesec]) {
+        mesecStats[mesec] = {
+          prisutan: 0,
+          odsutan: 0,
+          ukupno: 0
+        };
+      }
+      mesecStats[mesec].ukupno++;
+      if (item.status === "Prisutan") {
+        mesecStats[mesec].prisutan++;
+      } else {
+        mesecStats[mesec].odsutan++;
+      }
+      if (!tipNastaveStats[item.tip_nastave]) {
+        tipNastaveStats[item.tip_nastave] = {
+          prisutan: 0,
+          odsutan: 0,
+          ukupno: 0
+        };
+      }
+      tipNastaveStats[item.tip_nastave].ukupno++;
+      if (item.status === "Prisutan") {
+        tipNastaveStats[item.tip_nastave].prisutan++;
+      } else {
+        tipNastaveStats[item.tip_nastave].odsutan++;
+      }
     });
-
-    const chartData = {
-      labels: Object.keys(predmetiStats),
-      datasets: [
-        {
-          label: 'Prisutan',
-          data: Object.values(predmetiStats).map(stat => stat.prisutan),
-          backgroundColor: 'rgba(76, 175, 80, 0.5)',
-          borderColor: 'rgba(76, 175, 80, 1)',
-          borderWidth: 1,
-        },
-        {
-          label: 'Odsutan',
-          data: Object.values(predmetiStats).map(stat => stat.odsutan),
-          backgroundColor: 'rgba(244, 67, 54, 0.5)',
-          borderColor: 'rgba(244, 67, 54, 1)',
-          borderWidth: 1,
-        },
-      ],
-    };
-
-    return chartData;
+    let selectedData;
+    switch (filter) {
+      case 'predmeti':
+        selectedData = predmetiStats;
+        break;
+      case 'meseci':
+        selectedData = mesecStats;
+        break;
+      case 'tipNastave':
+        selectedData = tipNastaveStats;
+        break;
+      default:
+        selectedData = predmetiStats;
+    }
+    if (type === 'pie') {
+      const ukupnoPrisutan = Object.values(selectedData).reduce((acc, curr) => acc + curr.prisutan, 0);
+      const ukupnoOdsutan = Object.values(selectedData).reduce((acc, curr) => acc + curr.odsutan, 0);
+      return {
+        labels: ['Prisutan', 'Odsutan'],
+        datasets: [{
+          data: [ukupnoPrisutan, ukupnoOdsutan],
+          backgroundColor: [
+            'rgba(76, 175, 80, 0.5)',
+            'rgba(244, 67, 54, 0.5)'
+          ],
+          borderColor: [
+            'rgba(76, 175, 80, 1)',
+            'rgba(244, 67, 54, 1)'
+          ],
+          borderWidth: 1
+        }]
+      };
+    } else if (type === 'line') {
+      const sortedMonths = Object.keys(mesecStats).sort((a, b) => {
+        const months = ['januar', 'februar', 'mart', 'april', 'maj', 'jun', 'jul', 'avgust', 'septembar', 'oktobar', 'novembar', 'decembar'];
+        return months.indexOf(a) - months.indexOf(b);
+      });
+      return {
+        labels: sortedMonths,
+        datasets: [
+          {
+            label: 'Prisutan',
+            data: sortedMonths.map(month => mesecStats[month].prisutan),
+            borderColor: 'rgba(76, 175, 80, 1)',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            tension: 0.1
+          },
+          {
+            label: 'Odsutan',
+            data: sortedMonths.map(month => mesecStats[month].odsutan),
+            borderColor: 'rgba(244, 67, 54, 1)',
+            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+            tension: 0.1
+          }
+        ]
+      };
+    } else {
+      return {
+        labels: Object.keys(selectedData),
+        datasets: [
+          {
+            label: 'Prisutan',
+            data: Object.values(selectedData).map(stat => stat.prisutan),
+            backgroundColor: 'rgba(76, 175, 80, 0.5)',
+            borderColor: 'rgba(76, 175, 80, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Odsutan',
+            data: Object.values(selectedData).map(stat => stat.odsutan),
+            backgroundColor: 'rgba(244, 67, 54, 0.5)',
+            borderColor: 'rgba(244, 67, 54, 1)',
+            borderWidth: 1,
+          },
+        ],
+      };
+    }
   };
 
   // Komponenta za prikaz prisustva profesora
@@ -180,63 +265,10 @@ const EvidencijaPage = () => {
     if (!profesorPredmeti.length) {
       return <p className="no-results">Nema dostupnih predmeta.</p>;
     }
-
     const trenutniPredmet = profesorPredmeti.find(p => p.id === selectedPredmet);
-    
     if (!trenutniPredmet) {
       return <p className="no-results">Izaberite predmet.</p>;
     }
-
-    // Dodajemo funkciju za pripremu podataka za statistiku
-    const prepareStatisticsData = () => {
-      if (!trenutniPredmet) return null;
-
-      const terminStats = {};
-      
-      trenutniPredmet.termini.forEach(termin => {
-        termin.prisustva.forEach(p => {
-          p.evidencije.forEach(evidencija => {
-            if (!terminStats[termin.dan]) {
-              terminStats[termin.dan] = {
-                prisutan: 0,
-                odsutan: 0,
-                ukupno: 0
-              };
-            }
-            
-            terminStats[termin.dan].ukupno++;
-            if (evidencija.status) {
-              terminStats[termin.dan].prisutan++;
-            } else {
-              terminStats[termin.dan].odsutan++;
-            }
-          });
-        });
-      });
-
-      const chartData = {
-        labels: Object.keys(terminStats),
-        datasets: [
-          {
-            label: 'Prisutan',
-            data: Object.values(terminStats).map(stat => stat.prisutan),
-            backgroundColor: 'rgba(76, 175, 80, 0.5)',
-            borderColor: 'rgba(76, 175, 80, 1)',
-            borderWidth: 1,
-          },
-          {
-            label: 'Odsutan',
-            data: Object.values(terminStats).map(stat => stat.odsutan),
-            backgroundColor: 'rgba(244, 67, 54, 0.5)',
-            borderColor: 'rgba(244, 67, 54, 1)',
-            borderWidth: 1,
-          },
-        ],
-      };
-
-      return chartData;
-    };
-
     return (
       <div className="profesor-evidencija">
         <div className="filter-container">
@@ -252,13 +284,11 @@ const EvidencijaPage = () => {
             ))}
           </select>
         </div>
-
         <div className="termini-container">
           {trenutniPredmet.termini.map(termin => (
             <Card key={termin.id} className="termin-card">
               <h3>{termin.dan} {termin.vreme}</h3>
               <p>{termin.sala} - {termin.tip_nastave}</p>
-              
               <table className="prisustvo-table">
                 <thead>
                   <tr>
@@ -284,12 +314,11 @@ const EvidencijaPage = () => {
             </Card>
           ))}
         </div>
-
         <div className="statistics-container">
           <Card className="statistics-card">
             <h3>Statistika prisustva po terminima</h3>
             <StatisticsChart 
-              data={prepareStatisticsData()} 
+              data={prepareStatisticsDataProfesor(trenutniPredmet.prisustva || [])} 
               type="bar" 
               title={`Prisustvo za predmet ${trenutniPredmet.naziv}`}
             />
@@ -323,11 +352,14 @@ const EvidencijaPage = () => {
     const uniquePredmeti = [...new Set(svaEvidencija.map(item => item.predmetNaziv))];
     const uniqueDatumi = [...new Set(svaEvidencija.map(item => item.datum))].sort().reverse();
 
-    // Dodajemo funkciju za pripremu podataka za statistiku
-    const prepareStatisticsData = () => {
+    // Nova funkcija za statistiku koja koristi svaEvidencija
+    const prepareStatisticsData = (type = 'bar', filter = 'all') => {
       const predmetiStats = {};
+      const mesecStats = {};
+      const tipNastaveStats = {};
       
       svaEvidencija.forEach(item => {
+        // Statistika po predmetima
         if (!predmetiStats[item.predmetNaziv]) {
           predmetiStats[item.predmetNaziv] = {
             prisutan: 0,
@@ -335,36 +367,123 @@ const EvidencijaPage = () => {
             ukupno: 0
           };
         }
-        
         predmetiStats[item.predmetNaziv].ukupno++;
         if (item.status === "Prisutan") {
           predmetiStats[item.predmetNaziv].prisutan++;
         } else {
           predmetiStats[item.predmetNaziv].odsutan++;
         }
+
+        // Statistika po mesecima
+        const mesec = new Date(item.datum).toLocaleString('sr-RS', { month: 'long' });
+        if (!mesecStats[mesec]) {
+          mesecStats[mesec] = {
+            prisutan: 0,
+            odsutan: 0,
+            ukupno: 0
+          };
+        }
+        mesecStats[mesec].ukupno++;
+        if (item.status === "Prisutan") {
+          mesecStats[mesec].prisutan++;
+        } else {
+          mesecStats[mesec].odsutan++;
+        }
+
+        // Statistika po tipu nastave
+        if (!tipNastaveStats[item.tip_nastave]) {
+          tipNastaveStats[item.tip_nastave] = {
+            prisutan: 0,
+            odsutan: 0,
+            ukupno: 0
+          };
+        }
+        tipNastaveStats[item.tip_nastave].ukupno++;
+        if (item.status === "Prisutan") {
+          tipNastaveStats[item.tip_nastave].prisutan++;
+        } else {
+          tipNastaveStats[item.tip_nastave].odsutan++;
+        }
       });
 
-      const chartData = {
-        labels: Object.keys(predmetiStats),
-        datasets: [
-          {
-            label: 'Prisutan',
-            data: Object.values(predmetiStats).map(stat => stat.prisutan),
-            backgroundColor: 'rgba(76, 175, 80, 0.5)',
-            borderColor: 'rgba(76, 175, 80, 1)',
-            borderWidth: 1,
-          },
-          {
-            label: 'Odsutan',
-            data: Object.values(predmetiStats).map(stat => stat.odsutan),
-            backgroundColor: 'rgba(244, 67, 54, 0.5)',
-            borderColor: 'rgba(244, 67, 54, 1)',
-            borderWidth: 1,
-          },
-        ],
-      };
+      let selectedData;
+      switch (filter) {
+        case 'predmeti':
+          selectedData = predmetiStats;
+          break;
+        case 'meseci':
+          selectedData = mesecStats;
+          break;
+        case 'tipNastave':
+          selectedData = tipNastaveStats;
+          break;
+        default:
+          selectedData = predmetiStats;
+      }
 
-      return chartData;
+      if (type === 'pie') {
+        const ukupnoPrisutan = Object.values(selectedData).reduce((acc, curr) => acc + curr.prisutan, 0);
+        const ukupnoOdsutan = Object.values(selectedData).reduce((acc, curr) => acc + curr.odsutan, 0);
+        return {
+          labels: ['Prisutan', 'Odsutan'],
+          datasets: [{
+            data: [ukupnoPrisutan, ukupnoOdsutan],
+            backgroundColor: [
+              'rgba(76, 175, 80, 0.5)',
+              'rgba(244, 67, 54, 0.5)'
+            ],
+            borderColor: [
+              'rgba(76, 175, 80, 1)',
+              'rgba(244, 67, 54, 1)'
+            ],
+            borderWidth: 1
+          }]
+        };
+      } else if (type === 'line') {
+        const sortedMonths = Object.keys(mesecStats).sort((a, b) => {
+          const months = ['januar', 'februar', 'mart', 'april', 'maj', 'jun', 'jul', 'avgust', 'septembar', 'oktobar', 'novembar', 'decembar'];
+          return months.indexOf(a) - months.indexOf(b);
+        });
+        return {
+          labels: sortedMonths,
+          datasets: [
+            {
+              label: 'Prisutan',
+              data: sortedMonths.map(month => mesecStats[month].prisutan),
+              borderColor: 'rgba(76, 175, 80, 1)',
+              backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              tension: 0.1
+            },
+            {
+              label: 'Odsutan',
+              data: sortedMonths.map(month => mesecStats[month].odsutan),
+              borderColor: 'rgba(244, 67, 54, 1)',
+              backgroundColor: 'rgba(244, 67, 54, 0.1)',
+              tension: 0.1
+            }
+          ]
+        };
+      } else {
+        return {
+          labels: Object.keys(selectedData),
+          datasets: [
+            {
+              label: 'Prisutan',
+              data: Object.values(selectedData).map(stat => stat.prisutan),
+              backgroundColor: 'rgba(76, 175, 80, 0.5)',
+              borderColor: 'rgba(76, 175, 80, 1)',
+              borderWidth: 1,
+            },
+            {
+              label: 'Odsutan',
+              data: Object.values(selectedData).map(stat => stat.odsutan),
+              backgroundColor: 'rgba(244, 67, 54, 0.5)',
+              borderColor: 'rgba(244, 67, 54, 1)',
+              borderWidth: 1,
+            },
+          ],
+        };
+      }
     };
 
     return (
@@ -395,12 +514,38 @@ const EvidencijaPage = () => {
 
         {activeTab === "statistika" && (
           <div className="statistics-container">
+            <div className="statistics-controls">
+              <div className="control-group">
+                <label>Tip grafikona:</label>
+                <select 
+                  value={statisticsType} 
+                  onChange={(e) => setStatisticsType(e.target.value)}
+                  className="statistics-select"
+                >
+                  <option value="bar">Bar Chart</option>
+                  <option value="pie">Pie Chart</option>
+                  <option value="line">Line Chart</option>
+                </select>
+              </div>
+              <div className="control-group">
+                <label>Filter:</label>
+                <select 
+                  value={statisticsFilter} 
+                  onChange={(e) => setStatisticsFilter(e.target.value)}
+                  className="statistics-select"
+                >
+                  <option value="predmeti">Po predmetima</option>
+                  <option value="meseci">Po mesecima</option>
+                  <option value="tipNastave">Po tipu nastave</option>
+                </select>
+              </div>
+            </div>
             <Card className="statistics-card">
-              <h3>Statistika prisustva po predmetima</h3>
+              <h3>Statistika prisustva</h3>
               <StatisticsChart 
-                data={prepareStatisticsData()} 
-                type="bar" 
-                title="Prisustvo po predmetima"
+                data={prepareStatisticsData(statisticsType, statisticsFilter)} 
+                type={statisticsType} 
+                title="Prisustvo"
               />
             </Card>
           </div>

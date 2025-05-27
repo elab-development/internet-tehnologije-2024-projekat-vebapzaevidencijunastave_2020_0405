@@ -7,6 +7,7 @@ import axios, { getCsrfToken } from '../api/axios';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import Modal from '../components/Modal';
 
 const LoginPage = () => {
   const { login } = useContext(AuthContext);
@@ -14,6 +15,10 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotIdentifier, setForgotIdentifier] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotError, setForgotError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,6 +69,22 @@ const LoginPage = () => {
     }
   };
 
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSent(false);
+    if (!forgotIdentifier) {
+      setForgotError('Unesite korisničko ime ili broj indeksa.');
+      return;
+    }
+    try {
+      await axios.post('/api/zaboravljena-lozinka', { identifier: forgotIdentifier });
+      setForgotSent(true);
+    } catch (err) {
+      setForgotError('Došlo je do greške. Pokušajte ponovo.');
+    }
+  };
+
   return (
     <div className="login-container">
       <img src={logo} alt="FON Logo" className="login-logo" />
@@ -99,7 +120,33 @@ const LoginPage = () => {
 
           {loading && <div className="spinner"></div>}
         </form>
+        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          <button type="button" className="forgot-link" onClick={() => setShowForgotModal(true)}>
+            Zaboravljena lozinka?
+          </button>
+        </div>
       </Card>
+      {showForgotModal && (
+        <Modal onClose={() => setShowForgotModal(false)}>
+          <h2>Zaboravljena lozinka</h2>
+          <p>Unesite svoj broj indeksa ili korisničko ime. Naš administrator će biti obavešten i kontaktiraće vas sa instrukcijama za resetovanje lozinke.</p>
+          <form onSubmit={handleForgotSubmit}>
+            <Input
+              type="text"
+              placeholder="Broj indeksa ili korisničko ime"
+              value={forgotIdentifier}
+              onChange={(e) => setForgotIdentifier(e.target.value)}
+              className="login-input"
+            />
+            {forgotError && <p className="error-message">{forgotError}</p>}
+            {forgotSent && <p className="success-message">Zahtev je poslat administratoru!</p>}
+            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+              <Button type="submit" variant="primary">Pošalji</Button>
+              <Button type="button" variant="secondary" onClick={() => setShowForgotModal(false)}>Otkaži</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 };

@@ -8,8 +8,10 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  PointElement,
+  LineElement,
 } from 'chart.js';
-import { Bar, Pie } from 'react-chartjs-2';
+import { Bar, Pie, Line } from 'react-chartjs-2';
 
 ChartJS.register(
   CategoryScale,
@@ -18,12 +20,15 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  PointElement,
+  LineElement
 );
 
 const StatisticsChart = ({ data, type, title }) => {
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
@@ -33,12 +38,22 @@ const StatisticsChart = ({ data, type, title }) => {
         text: title,
       },
     },
+    scales: type === 'line' ? {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    } : undefined
   };
 
   if (type === 'bar') {
-    return <Bar options={options} data={data} />;
+    return <div style={{ height: '400px' }}><Bar options={options} data={data} /></div>;
   } else if (type === 'pie') {
-    return <Pie data={data} options={options} />;
+    return <div style={{ height: '400px' }}><Pie data={data} options={options} /></div>;
+  } else if (type === 'line') {
+    return <div style={{ height: '400px' }}><Line options={options} data={data} /></div>;
   }
 
   return null;

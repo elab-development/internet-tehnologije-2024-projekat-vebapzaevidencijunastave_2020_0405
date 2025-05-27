@@ -5,6 +5,7 @@ import ProfesoriManager from '../components/admin/ProfesoriManager';
 import PredmetiManager from '../components/admin/PredmetiManager';
 import RasporediManager from '../components/admin/RasporediManager';
 import TerminiManager from '../components/admin/TerminiManager';
+import ResetRequestsManager from '../components/admin/ResetRequestsManager';
 import Card from '../components/Card';
 import Button from '../components/Button';
 
@@ -21,6 +22,8 @@ const AdminPage = () => {
         return <PredmetiManager />;
       case 'rasporedi':
         return <RasporediManager />;
+      case 'reset':
+        return <ResetRequestsManager />;
       default:
         return <Dashboard setActiveSection={setActiveSection} />;
     }
@@ -66,6 +69,13 @@ const AdminPage = () => {
           variant={activeSection === 'rasporedi' ? 'primary' : 'secondary'}
         >
           Rasporedi
+        </Button>
+        <Button 
+          className={activeSection === 'reset' ? 'active' : ''} 
+          onClick={() => setActiveSection('reset')}
+          variant={activeSection === 'reset' ? 'primary' : 'secondary'}
+        >
+          Reset zahtevi
         </Button>
       </nav>
       <main className="admin-content">

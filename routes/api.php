@@ -11,6 +11,8 @@ use App\Http\Controllers\PrisustvoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RasporedProfesorController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\PasswordResetRequestController;
  
 
 
@@ -61,4 +63,9 @@ Route::middleware(['auth:sanctum', 'profesor'])->prefix('profesor')->group(funct
     Route::get('/prisustvo/termin/{rasporedPredmetId}/{datum?}', [PrisustvoController::class, 'countPrisustvoByTermin']);
     Route::post('/profile/update', [ProfesorController::class, 'updateProfile']);
 });
+
+Route::post('/zaboravljena-lozinka', [ForgotPasswordController::class, 'notifyAdmin']);
+
+Route::get('/password-reset-requests', [PasswordResetRequestController::class, 'index']);
+Route::post('/admin/reset-password', [PasswordResetRequestController::class, 'resetPassword']);
 
