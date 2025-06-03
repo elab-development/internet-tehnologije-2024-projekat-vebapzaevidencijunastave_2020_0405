@@ -110,7 +110,25 @@ const RasporediManager = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('auth_token');
-      await axios.post(`/api/rasporedi/${selectedRaspored.id}/predmeti`, predmetFormData, {
+      let tipNastave = predmetFormData.tip_nastave;
+      if (tipNastave.toLowerCase().includes('predav')) tipNastave = 'Predavanje';
+      if (tipNastave.toLowerCase().includes('vezb')) tipNastave = 'Vezbe';
+      let danUNedelji = predmetFormData.dan_u_nedelji;
+      if (danUNedelji === 'Četvrtak') danUNedelji = 'Cetvrtak';
+      const dani = ['Ponedeljak', 'Utorak', 'Sreda', 'Cetvrtak', 'Petak'];
+      if (!dani.includes(danUNedelji)) {
+        const danIndex = parseInt(danUNedelji, 10);
+        if (!isNaN(danIndex) && danIndex >= 1 && danIndex <= 5) {
+          danUNedelji = dani[danIndex - 1];
+        }
+      }
+      const dataToSend = {
+        ...predmetFormData,
+        tip_nastave: tipNastave,
+        dan_u_nedelji: danUNedelji
+      };
+      console.log('Saljem na backend:', dataToSend);
+      await axios.post(`/api/rasporedi/${selectedRaspored.id}/predmeti`, dataToSend, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setPredmetFormData({
@@ -269,11 +287,11 @@ const RasporediManager = () => {
                   className="form-select"
                 >
                   <option value="">Izaberite dan</option>
-                  <option value="1">Ponedeljak</option>
-                  <option value="2">Utorak</option>
-                  <option value="3">Sreda</option>
-                  <option value="4">Četvrtak</option>
-                  <option value="5">Petak</option>
+                  <option value="Ponedeljak">Ponedeljak</option>
+                  <option value="Utorak">Utorak</option>
+                  <option value="Sreda">Sreda</option>
+                  <option value="Cetvrtak">Cetvrtak</option>
+                  <option value="Petak">Petak</option>
                 </select>
               </div>
               <div className="form-group">
@@ -312,9 +330,8 @@ const RasporediManager = () => {
                   className="form-select"
                 >
                   <option value="">Izaberite tip nastave</option>
-                  <option value="predavanje">Predavanje</option>
-                  <option value="vezbe">Vežbe</option>
-                  <option value="laboratorija">Laboratorija</option>
+                  <option value="Predavanje">Predavanje</option>
+                  <option value="Vezbe">Vezbe</option>
                 </select>
               </div>
               <Button type="submit" variant="primary">Dodaj</Button>
