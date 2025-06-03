@@ -551,7 +551,7 @@ const EvidencijaPage = () => {
           </div>
         )}
 
-        {activeTab === "prisustva" ? (
+        {activeTab === "prisustva" && (
           <>
             <div className="filter-container">
               <select value={filterPredmet} onChange={(e) => setFilterPredmet(e.target.value)}>
@@ -627,7 +627,8 @@ const EvidencijaPage = () => {
               </>
             )}
           </>
-        ) : (
+        )}
+        {activeTab === "aktivni-termini" && (
           <div className="aktivni-termini">
             <Button
               className="refresh-btn"
